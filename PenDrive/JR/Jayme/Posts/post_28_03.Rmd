@@ -1,0 +1,58 @@
+---
+title: "Acusando Alguém de Mentir com Estatística: Táticas"
+author: "Jayme Junior"
+date: "23 de março de 2017"
+output: pdf_document
+---
+
+#Acusando Alguém de Mentir com Estatística: Táticas
+
+Depois das várias discussões, críticas, artigos e até livros em resposta
+ao seu livro *The Bell Curve* (Herrnstein e Murray, 1994), publicado em 
+conjunto com Richard J. Herrnstein, Charles Murray analisou os ataques 
+ao seu livro assim como a outros trabalhos e desenvolveu seis táticas
+para atacar um livro, artigo ou notícia e acusá-lo de mentir com 
+estatística, partindo do princípio de que "Dificilmente alguém que está 
+te ouvindo leu o livro. Se você conseguir convencer a grande maioria que 
+nem abriu o livro, não vai importar se a minoria que leu o livro sabe o 
+que você está fazendo." Statistical Science (Institute of Mathematical 
+Statistics, 2005, vol. 20, no. 3, p. 239, tradução nossa).
+
+Fazer com que tudo pareça uma bagunça: As críticas nem precisam ser 
+direcionadas aos argumentos do trabalho, basta criar a impressão de que
+existem vários erros. As amostras são uma ótima fonte para essas 
+críticas, se for representativa, diga que está desatualizada, se a 
+amostra é atual e recente, você pode procurar por dados perdido e alegar 
+que eles trazem viés para a análise. Pode-se também acusar o autor de 
+usado o modelo errado para a análise.
+
+Tendo acesso aos dados para reproduzir a análise a ser criticada, podem 
+ser acrescentadas variáveis independentes sem se preocupar se elas são
+fortemente relacionadas com a análise original, misturando as velhas e 
+as novas variáveis eu um único modelo para gerar dúvida e descreditar o
+trabalho.
+
+Criar hipóteses alternativas, mesmo sem evidências, mas de forma firme e
+convincente. Como no poker, onde não é necessário ter uma boa mão para
+jogar como se tivesse uma boa mão.
+
+Convencer a audiência de que existem inconsistências nos dados, 
+novamente sem evidências, dará munição para gerar dúvidas a respeito de
+todas as conclusões que o autor do trabalho chegou.
+
+No caso do trabalho a ser criticado tenha usado várias referências onde
+se chagam a mesma conclusão, mas for possível encontrar uma única 
+referência onde o resultado seja diferente, pode-se alegar que o autor
+deliberadamente ignorou esse resultado contrério.
+
+E no caso do trabalho tratar em algum momento de um assunto polêmico: 
+gênero, raça, meio ambiente, e usado como objeto científico, mesmo que 
+de forma breve. Com essas condições satisfeitas, é possível relatar a 
+abordagem do trabalho a essas questões de forma que a audiência a veja 
+como repugnante.
+
+Estas são seis maneiras de fazer as pessoas pensarem que um trabalho foi
+uma bagunça, que seus resultados foram sem sentido e que seu autor é 
+incompetente.
+
+

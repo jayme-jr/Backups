@@ -1,0 +1,31 @@
+---
+title: "História da Lógica Fuzzy"
+author: "Jayme Junior"
+output: pdf_document
+---
+
+
+Em 1920, o lógico polonês chamado Jan Lukasiewicz desenvolveu e 
+introduziu conjuntos com grau de pertinência 0, $\frac{1}{2}$ e 1
+(conjuntos nebulosos), posteriormente, levando o professor de Ciências 
+da Computação da Universidade da Califórnia Lofti Asker Zadeh, em 1965,
+a publicar o primeiro trabalho sobre lógica fuzzy ou difusa, o artigo 
+*Fuzzy Stes* no jornal *Information and Control*.
+
+Zadeh criou a lógica fuzzy aliando a lógica clássica com os conjuntos de
+Lukasiewicz, que consiste em respostas com valores que variam entre 0 e 
+1, ao contrário da booleana que admite somente verdadeiro ou falso(0 ou
+1). 
+
+Nas décadas de 70 e 80, a lógicva fuzzy foi aplicada industrialmente na 
+Europa, especialmente em 1974 quando o professor Ebrahim Mamdani 
+controlou uma máquina a vapor usando raciocínio fuzzy.
+
+Em 1980 o Japão começou a utilizar estas aplicações em tratamento de 
+água e em um sistema de metrô. Na década de 90, a lógica fuzzy chamou a 
+atenção dos Estados Unidos.
+
+Hoje em dia, pelo grande sucesso comercial e aplicações práticas, a 
+lógica fuzzy tem uma grande aceitação, principalmente na indústria.
+
+

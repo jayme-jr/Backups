@@ -1,0 +1,102 @@
+---
+title: "Trabalho 11"
+author: "Rafael Morciani / GRR 20160217"
+output: pdf_document
+---
+
+##Dados
+
+```{r}
+Nh <-  c(500,700,300) #Número de fazendas em cada estrato
+Ch <-  c(100,150,50)  #Custo unitário da pesquisa em cada estrato
+N <-  sum(Nh) #Total de fazendas (população)
+c0 <- 5000 #Custo fixo para realização da pesquisa
+Wh <- Nh/N
+
+E1 <- c(5,6,4,7,6,6,5,4) #Dados do estrato 1
+E2 <- c(6,5,4,8,3,7,8,7) #Dados do estrato 2
+E3 <- c(1,7,3,9,12,2,3,13) #Dados do estrato 3
+
+S1 <- (sum(E1^2)-((sum(E1)^2)/length(E1))) / (length(E1)-1) #Variância dos dados no estrato 1
+S2 <- (sum(E2^2)-((sum(E2)^2)/length(E2))) / (length(E2)-1) #Variância dos dados no estrato 2
+S3 <- (sum(E3^2)-((sum(E3)^2)/length(E3))) / (length(E3)-1) #Variância dos dados no estrato 3
+
+S2h <- c(S1,S2,S3) #Variâncias dos 3 estratos
+Sh <- c(sqrt(S1),sqrt(S2),sqrt(S3)) #Raiz da variância dos 3 estratos
+```
+
+##A) Controle da precisão
+Amostra com erro de $\epsilon$ = 0,5 com 95% de confiança
+
+```{r}
+epsilon <- 0.5 #Precisão desejada
+z <- 1.96 #Valor da distribuição gaussiana com 95% de confiança
+V <- (epsilon/z)^2 #Variância desejada
+
+n <- ((sum(Wh*Sh/sqrt(Ch)))*(sum(Wh*Sh*sqrt(Ch)))) / (V + ((1/sum(Nh))*sum(Wh*S2h)))
+nh <- as.integer(n*(((Wh*Sh)/(sqrt(Ch)))/(sum(Wh*Sh/sqrt(Ch)))))
+```
+Pelo plano de amostragem aleatória estratificada, e com as informações informadas temos os sequintes tamanhos de amostras:
+
+Total de fazendas amostradas: `r as.integer(n) ` fazendas.
+
+Estrato 1: `r nh[1] ` fazendas.
+
+Estrato 2: `r nh[2] ` fazendas.
+
+Estrato 3: `r nh[3] ` fazendas.
+
+
+
+##B) Controle de custo
+Amostra com orçamento disponível de 10000 U.M.
+
+```{r}
+C <- 10000 #Orçamento disponível
+
+n <- ((C-c0)*(sum(Wh*Sh/sqrt(Ch)))) / (sum(Wh*Sh*sqrt(Ch)))
+nh <- as.integer(n*(((Wh*Sh)/(sqrt(Ch)))/(sum(Wh*Sh/sqrt(Ch)))))
+```
+Pelo plano de amostragem aleatória estratificada, e com as informações informadas temos os sequintes tamanhos de amostras:
+
+Total de fazendas amostradas: `r as.integer(n) ` fazendas.
+
+Estrato 1: `r nh[1] ` fazendas.
+
+Estrato 2: `r nh[2] ` fazendas.
+
+Estrato 3: `r nh[3]+1 ` fazendas.
+
+##Amostra definitiva
+
+Estimar a área média por fazenda com 95% de confiança.
+
+```{r}
+amostra <- matrix(data=c(10,20,40,55,122,248,313.3,806.9,2395.6), ncol = 3, byrow = FALSE, dimnames = list(c("ESTRATO 1","ESTRATO 2","ESTRATO 3"),c("nh","SUM(y)","SUM(y²)")))
+```
+```{r}
+yh <- c(amostra[,2]/amostra[,1]) #Média amostral de cada estrato
+yst <- sum(Wh*yh) #Média amostral estratificada
+t <- -qt(p=(0.025), N-3) #Valor tabelado da distribuição t com alpha = 0,05 e N-3 graus de liberdade
+Vyst <- (1/(N^2)) * sum(Nh*(Nh-amostra[,1]) * (S2h/amostra[,1])) #Variância da média amostral estratificada
+EPyst <- sqrt(Vyst) #Erro padrão de yst
+IC <- c(yst-(t*EPyst),yst+(t*EPyst)) #Intervalo com 95% de confiança
+```
+Área média plantada estimada: `r yst ` Unidades de área
+
+Intervalo com 95% de confiança da verdadeira média estar no intervalo calculado: `r IC ` unidades de área.
+
+##Erro absoluto
+
+```{r}
+V <- sum((Wh^2)*(S2h)/amostra[,1])-(sum((Wh^2)*S2h/Nh))
+epsilon <- 1.96*sqrt(V)
+```
+O erro absoluto é: $\epsilon$=`r epsilon` unidades de área.
+
+##Valor final da pesquisa
+
+```{r}
+C <- c0+sum(amostra[,1]*Ch) #Custo fixo + custo por amostra
+```
+Valor final da pesquisa: 11.000 Unidades Monetárias.

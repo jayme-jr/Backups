@@ -1,0 +1,490 @@
+---
+title: "Trabalho de Estatística Inferencial"
+author: "Luan Demarco Fiorentin"
+date: '`r Sys.Date() `'
+output:
+  pdf_document: default
+  word_document: default
+  html_document: 
+    code_folding: hide
+    number_sections: yes
+    toc: yes
+    toc_float: yes
+subtitle: Modelo Espacial Condicional AutoRegressivo (CAR)
+header-includes: \usepackage[brazil]{babel}
+                 \usepackage{amsmath}
+                 \usepackage{float}
+                 \usepackage{bm}
+csl: ABNT_UFPR_2011.csl
+bibliography: refs.bib
+---
+
+```{r, include=FALSE}
+
+knitr::opts_chunk$set(
+  cache = TRUE
+)
+
+```
+
+# Resumo
+
+  Os modelos Condicionais Autorregressivos (CAR) são extensamente utilizados para analisar dados espaciais de áreas. O objetivo deste trabalho foi realizar inferência pelo método da máxima verossimilhança sobre os parâmetros do modelo CAR. Os parâmetros estimados e intervalos de confiança do modelo foram implementados computacionalmente no *software* R. Os valores obtidos na implementação computacional do modelo CAR foram bastante semelhantes com aqueles fornecido pelo pacote spautolm, o qual é destinado a modelar dados espaciais. No entanto, o motivo destas diferenças não foram identificados ainda.
+
+# Introdução
+
+  A estatística espacial trata da manipulação e análise de dados espaciais. Neste tipo de dados, a localização geográfica das observações é fundamental na análise dos fenômenos de interesse, pois, com uma certa frequência, elas apresentam algum tipo de dependência no espaço. Atualmente, a estatística espacial é utilizada nas mais diversas áreas do conhecimento, mas com destaque para área da agronomia, epidemiologia, demografia, geologia, entre outras.
+  
+  @cressie1993statistics classifica os dados espaciais em diferentes formas. Os dados geoestatísticos (*Geostatistics Data*) se referem a processos espaciais que variam continuamente no espaço. Enquanto os dados de padrões pontuais (*Point Patterns Data*) são aqueles em que o fenômeno avaliado é o local do evento. Por fim, os dados de áreas (*Lattice Data*) correspondem aos fenômenos que ocorrem em sub-regiões regulares ou irregulares no espaço.
+  
+  Para os dados de áreas, @de2012bayesian ressalta que os modelos Condicionais Autoregressivos (*Conditional Autoregressive Models - CAR*, ou *Spatials Error Models - SEM*) são frequentemente usados para modelar a variabilidade espacial de fenômenos aleatórios de interesse em sub-regiões. Segundo @krainski2008estrutura, este modelo é especificado por um conjunto de distribuições condicionais, onde a variável de interesse segue uma distribuição Normal, mas o parâmetro de média é obtido pela média ponderada das observações das áreas vizinhas e a variância é inversamente proporcional ao número de áreas vizinhas.
+
+  Os parâmetros estimados dos modelos CAR podem ser obtidos de diferentes formas e a escolha do método depende da preferência do pesquisador e também do tipo dos dados. Uma abordagem comumente utilizada é pelo método da Máxima Verossimilhança (MV), como pode ser observado no trabalho de @de2016modelo. Recentemente, @de2012bayesian aplicou métodos Bayesianos na análise de modelos CAR. Essa abordagem está cada vez mais sendo utilizada em estaatística espacial devido aos ótimos resultados obtidos.
+
+  De acordo com @alam2015fitting, apesar dos modelos CAR serem amplamente utilizados para análise de dados espaciais, ainda não há muitos *softwares* e pacotes estatísticos para ajustar este tipo de modelos. Assim, os autores desenvolveram o pacote hglm para o ajuste de modelos lineares generalizados hierárquicos com efeitos aleatórios correlacionados espacionalmente. Outras pesquisas envolvendo estatística espacial com diferentes abordagens para modelar fenômenos e formas de obter parâmetros pode ser encontrado em @lee2013carbayes e @de2012bayesian e @wall2004close.
+  
+  Os objetivos do presente trabalho foram *i)* obter os estimadores dos parâmetros do modelo CAR usando o método da máxima verossimilhança; *ii)* estimar o intervalo de confiança para os parâmetros estimados do modelo CAR, *iii)* e comparar os resultados obtidos neste trabalho com valores encontrados em pacotes especializados para análise de dados espaciais.
+
+# Modelo
+
+  O processo aleatório espacial ($\boldsymbol{Y}$) considerado neste estudo foi modelado por meio do modelo de regressão linear espacial Condicional Autorregressivo (CAR). Este modelo considera os efeitos espaciais como um ruído. Assim, os efeitos da dependência espacial entre as áreas estão associados ao termo de erro $\boldsymbol{\xi}$. O modelo pode ser escrito genericamente como
+  
+$$\boldsymbol{Y} = \boldsymbol{X} \boldsymbol{\beta} + \boldsymbol{\xi}$$
+  
+  Se não há dependência espacial entre as observações, então ${\rho}$ é um valor nulo e o modelo pode ser ajustado pelo tradicional método dos mínimos quadrados ordinários. Caso contrário, o modelo CAR apresenta uma estrutura autorregressiva no erro como
+  
+$$\boldsymbol{\xi} = {\rho} \boldsymbol{W}\boldsymbol{\xi} + \boldsymbol{\epsilon}$$
+
+em que: $\boldsymbol{Y}$ = vetor aleatório da variável resposta, com dimensão $nx1$; $\boldsymbol{X}$ = matriz de covariáveis observadas, com dimensão $nxp$, sendo $n$ o número de observações e $p$ o número de covariáveis; $\boldsymbol{\beta}$ = vetor de parâmetros desconhecidos, com dimensão $nx1$; ${\rho}$ = escalar que indica a correlação espacial; $\boldsymbol{W}$ = matriz de dependência espacial entre as áreas $\boldsymbol{y_{i}}$, com dimensão $nxn$; $\boldsymbol{\epsilon}$ = vetor de erro aleatório, com dimensão $nx1$ e $i = 1, 2, ..., n$, onde pressupõem-se que os erros são independentes e identicamente distribuídos com $\sim N(0, {\tau})$.
+  
+  Assumindo que a variável resposta apresenta uma distribuição Normal, então o fenômeno aleatório $\boldsymbol{Y}$ pode ser representado em forma de matriz como
+  
+$$\boldsymbol{Y} \sim N( \boldsymbol{\mu}, \Sigma^{-1} )$$
+
+em que: $\boldsymbol{\mu}$ = $\boldsymbol{X} \boldsymbol{\beta}$; $\Sigma^{-1}$ = ${\tau} (\boldsymbol{D} - {\rho} \boldsymbol{W})$; ${\tau}$ = escalar que indica a variância de $\boldsymbol{y}$; $\boldsymbol{D}$ = matriz diagonal com o número de vizinhos de $\boldsymbol{y}$, com dimensão $nxn$; ${\rho}$ = escalar que indica a correlação espacial, com dimensão $nxn$; $\boldsymbol{W}$ = matriz de dependência espacial entre as áreas $\boldsymbol{y}$, com dimensão $nxn$.
+
+# Inferência
+  Os estimadores dos parâmetros $\boldsymbol\beta$ e $\Sigma^{-1}$ do modelo CAR foram obtidos pela maximização da função de verossimilhança
+  
+$$L (\boldsymbol{\beta}, \Sigma^{-1} | \boldsymbol{y}) = (2\pi)^{-\frac{1}{2}} |\Sigma^{-1}| \exp \bigg[-\frac{1}{2}(\boldsymbol{y} - \boldsymbol{X} \boldsymbol{\beta})^{T} \Sigma^{-1} (\boldsymbol{y} - \boldsymbol{X} \boldsymbol{\beta}) \bigg]$$
+
+  Como o logarítmo natural é uma função monótona, por conveniência, optou-se por maximizar a função de log-verossimilhança
+  
+$$l (\boldsymbol{\beta}, \Sigma^{-1} | \boldsymbol{y}) = -\frac{n}{2} \ln(2\pi) - \frac{n}{2} \ln(|\Sigma|)- \bigg[\frac{1}{2} (\boldsymbol{y} - \boldsymbol{X} \boldsymbol{\beta})^{T} \Sigma^{-1} (\boldsymbol{y} - \boldsymbol{X} \boldsymbol{\beta})\bigg]$$
+
+  O estimador de máxima verossimilhança (EMV) de cada parâmetro foi obtido por meio da função escore $U(\theta)$, a qual é a derivada de primeira ordem da função de verossimilhança em relação ao parâmetro de interesse. Em seguida, a escore foi igualada a zero para encontrar os pontos críticos.
+
+  O EMV do parâmetro $\hat{\boldsymbol{\beta}}$, que expressa a média, foi determinado analiticamente como
+
+$$\frac{\partial l (\boldsymbol{\beta}, \Sigma^{-1} | \boldsymbol{y})} {\partial \boldsymbol{\beta}} = - \frac{1}{2} \bigg[-2 \boldsymbol{X}^{T} \Sigma^{-1} \boldsymbol{y} + 2 \boldsymbol{X}^{T} \Sigma^{-1} \boldsymbol{X} \boldsymbol{\beta} \bigg] = 0$$
+
+$$\boldsymbol{\hat{\beta}} = (\boldsymbol{X}^{T} \Sigma^{-1} \boldsymbol{X})^{-1} (\boldsymbol{X}^{T} \Sigma^{-1} \boldsymbol{y})$$
+
+  O parâmetro $\Sigma^{-1}$, que expressa a variância, é função dos parâmetros $\tau$ e $\rho$. Assim, o EMV para o parâmetro $\hat{\tau}$ foi obtido analiticamente como
+  
+$$\frac{\partial l (\boldsymbol{\beta}, \Sigma^{-1} | \boldsymbol{y})} {\partial \boldsymbol{\Sigma^{-1}}} = \frac{\partial l (\boldsymbol{\beta}, {\tau}, {\rho} | \boldsymbol{y})} {\partial {\tau}} = -\frac{1}{2} \frac{n}{| {\hat{\tau}} |} + \frac{1}{2} \bigg[\frac{(\boldsymbol{y} - \boldsymbol{X} \boldsymbol{\beta})^{T} (\boldsymbol{D} - {\rho} \boldsymbol{W})^{-1} (\boldsymbol{y} - \boldsymbol{X} \boldsymbol\beta)} {{\hat{\tau}}^{2}} \bigg] = 0$$
+
+$${\hat{\tau}} = n^{-1} (\boldsymbol{y} - \boldsymbol{X} \boldsymbol{\beta})^{T} (\boldsymbol{D} - {\rho} \boldsymbol{W})^{-1} (\boldsymbol{y} - \boldsymbol{X} \boldsymbol{\beta)}$$
+
+  O parâmetro ${\hat{\rho}}$ não pôde ser obtido analiticamente. Desta forma, uma função de otimização foi utilizada para estimar este parâmetro.
+
+
+# Implementação computacional
+
+```{r, echo=TRUE, eval=FALSE, message=FALSE, warning=FALSE}
+
+##### install.packages("mcglm")
+library(mcglm)
+library(mvtnorm)
+library(bbmle)
+
+##### Dados espaciais foram simulados
+
+##### Simulação dos lattices
+nb <- cell2nb(10, 10)
+
+##### Lista com os dados simulados
+dados_espaciais <-mc_car(nb)
+
+##### dados_espaciais é uma lista com dois componentes. Em [1] está D e em [2] está W
+##### Matriz de dependencia espacial entre as áreas - W
+W <- dados_espaciais[[2]]
+
+##### Matriz diagonal com o numero de vizinhos - D
+D <- dados_espaciais[[1]]
+
+##### Simulação do vetor da variável preditiva
+intercepto <- 10
+angular <- 3
+X <- as.numeric(seq(-1,1,length.out = 100))
+mu <- intercepto + angular * X
+
+##### Simulação da variância
+sigma <- as.matrix((0.5 * (D + 0.5 * W)))
+
+##### Simulação do vetor da variável resposta
+Y <- as.numeric(rmvnorm(1, mean = mu, sigma = solve(sigma)))
+
+##### Ajuste do modelo pelo pacote spautolm
+# Função spautolm requer as matrizes de vizinhança em formato de lista
+lista_vizinhos <- nb2listw(nb)
+est_funcao_spauto <- spautolm(Y ~ X, listw = lista_vizinhos, family = "CAR")
+
+##### Função de log-verossimilhança - LV
+LV1 <- function(b0, b1, rho, tau, y, x, W, D){
+  parametros = c(b0, b1, rho, tau)
+  print(round(x = parametros, digits = 2))
+  mu = parametros[1] + parametros[2] * x
+  rho <- parametros[3]
+  tau <- exp(parametros[4])
+  sigma <- as.matrix((tau * (D + rho * W)))
+  out <- -dmvnorm(y, mean = mu, sigma = solve(sigma), log = TRUE)
+  return(out)
+}
+
+##### Ajuste do modelo CAR
+# A função mle2 estima parâmetros pelo método da máxima verossimilhança
+metodo_1 <- mle2(minuslogl = LV1, 
+     start = list("b0" = (10), "b1" = (2), "rho" = (0.2), "tau" = (0.5)), 
+     method = "BFGS", 
+     data = list("y" = Y, "x" = X, "W" = W, "D" = D), 
+     lower = c(-100, -100, -0.99, -10), 
+     upper = c(100, 100, 0.99, 100), 
+     hessian.opts = TRUE)
+
+##### Verossimilhança perfilada
+veros_perfil <- profile(metodo_1)
+plot(veros_perfil)
+
+##### Estimativa pontual dos parâmetros
+parametros_metodo_1 <- c(coef(metodo_1)[1:3], exp(((coef(metodo_1)[4]))))
+
+##### Matriz de variância-covariância assintótica
+vcov(metodo_1)
+
+##### Erro padrão assintótico
+EP_metodo_1 <- sqrt(diag(vcov(metodo_1)))
+
+##### Intervalo de confiança dos parâmetros, com 95% de probabilidade
+b0 <- matrix(data = parametros_metodo_1[1] + c(-1, 1) * qnorm(0.975) * EP_metodo_1[1], nrow = 1)
+b1 <- matrix(data = parametros_metodo_1[2] + c(-1, 1) * qnorm(0.975) * EP_metodo_1[2], nrow = 1)
+rho <- matrix(data = parametros_metodo_1[3] + c(-1, 1) * qnorm(0.975) * EP_metodo_1[3], nrow = 1)
+tau <- matrix(data = (parametros_metodo_1[4]) + c(-1, 1) * qnorm(0.975) * EP_metodo_1[4], nrow = 1)
+
+```
+
+
+# Exemplo com dados reais
+
+```{r, echo=FALSE, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+
+# Carregar pacotes utilizados
+library(knitr)
+library(mcglm)
+library(mvtnorm)
+library(psych)
+library(bbmle)
+library(spdep)
+
+#######################################################################################################
+##### Método 1
+#######################################################################################################
+# Todos os parâmetros foram estimados numericamente
+
+
+
+##### Simulação dos dados
+
+##### Dados espaciais foram simulados
+
+nb <- cell2nb(10, 10)
+nb
+
+dados_espaciais <-mc_car(nb)
+dados_espaciais
+
+
+##### dados_espaciais é uma lista com dois componentes. Em [1] está D e em [2] está W
+
+class(dados_espaciais)
+dados_espaciais
+
+# Matriz de dependencia espacial entre as áreas - W
+
+W <- dados_espaciais[[2]]
+W
+
+# Exemplo de matriz de dependência espacial
+
+W_exemplo <- dados_espaciais[[2]]
+plot(image(W_exemplo, xlab = "Área i", ylab = "Área j"))
+
+# Matriz diagonal com o numero de vizinhos - D
+
+D <- dados_espaciais[[1]]
+D
+
+
+##### Simulação da variância
+
+sigma <- as.matrix((0.5 * (D + 0.5 * W)))
+sigma
+
+
+##### Simulação do vetor da variável preditiva
+
+#intercepto <- 10
+#angular <- 3
+
+#X <- as.numeric(seq(-1,1,length.out = 100))
+#X
+#mu <- intercepto + angular * X
+#mu
+
+
+##### Simulação do vetor da variável resposta
+
+#Y <- as.numeric(rmvnorm(1, mean = mu, sigma = solve(sigma)))
+#Y
+
+##### Exportar os dados simulados para arquivo csv
+#write.table(x = Y, file = "Y.csv", sep = '\t')
+#write.table(x = X, file = "X.csv", sep = '\t')
+
+
+```
+
+
+```{r, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE, include=FALSE}
+
+# Carregar dados simulados
+# Para facilitar o processamento dos dados, exporta-se os dados para arquivo csv
+# e depois troca o comando no argumento eval do chunck
+
+# Importar os arquivos simulados para variáveis Y e X
+
+Y <- read.table("Y.csv", header = TRUE, sep = "\t")
+X <- read.table("X.csv", header = TRUE, sep = "\t")
+Y <- as.numeric(Y$x)
+mean(Y)
+X <- as.numeric(X$x)
+mean(X)
+
+##### Ajuste do modelo CAR pelo pacote spautolm
+
+class(nb)
+lista_vizinhos <- nb2listw(nb)
+lista_vizinhos
+
+est_funcao_spauto <- spautolm(Y ~ X, listw = lista_vizinhos, family = "CAR")
+summary(est_funcao_spauto)
+
+
+##### Função de log-verossimilhança - LV
+
+LV1 <- function(b0, b1, rho, tau, y, x, W, D){
+  parametros = c(b0, b1, rho, tau)
+  print(round(x = parametros, digits = 2))
+  mu = parametros[1] + parametros[2] * x
+  rho <- parametros[3]
+  tau <- exp(parametros[4])
+  sigma <- as.matrix((tau * (D + rho * W)))
+  out <- -dmvnorm(y, mean = mu, sigma = solve(sigma), log = TRUE)
+  return(out)
+}
+
+
+##### Ajuste do modelo
+
+### A função mle2 estima parâmetros pelo método da máxima verossimilhança
+
+metodo_1 <- mle2(minuslogl = LV1, 
+     start = list("b0" = (10), "b1" = (2), "rho" = (0.2), "tau" = (0.5)), 
+     method = "BFGS", 
+     data = list("y" = Y, "x" = X, "W" = W, "D" = D), 
+     lower = c(-100, -100, -0.99, -10), 
+     upper = c(100, 100, 0.99, 100), 
+     hessian.opts = TRUE)
+
+summary(metodo_1)
+metodo_1
+
+
+# Verossimilhança perfilhada
+veros_perfil <- profile(metodo_1)
+
+plot(veros_perfil)
+
+
+### Estimativas pontuais dos parâmetros
+
+parametros_metodo_1 <- c(coef(metodo_1)[1:3], exp(((coef(metodo_1)[4]))))
+parametros_metodo_1
+
+
+## Matriz de variância-covariância assintótica
+
+vcov(metodo_1)
+
+
+# Erros padrões assintóticos
+
+EP_metodo_1 <- sqrt(diag(vcov(metodo_1)))
+EP_metodo_1
+
+### Intervalo de confiança dos parâmetros
+
+b0 <- matrix(data = parametros_metodo_1[1] + c(-1, 1) * qnorm(0.975) * EP_metodo_1[1], nrow = 1)
+b1 <- matrix(data = parametros_metodo_1[2] + c(-1, 1) * qnorm(0.975) * EP_metodo_1[2], nrow = 1)
+rho <- matrix(data = parametros_metodo_1[3] + c(-1, 1) * qnorm(0.975) * EP_metodo_1[3], nrow = 1)
+tau <- matrix(data = (parametros_metodo_1[4]) + c(-1, 1) * qnorm(0.975) * EP_metodo_1[4], nrow = 1)
+
+
+# Resumo dos resultados do método 1
+
+resultados <- as.data.frame(rbind(b0, b1, tau, rho))
+resultados <- cbind(parametros_metodo_1, resultados)
+
+rownames(resultados) <- c("b0", "b1", "rho", "tau")
+colnames(resultados) <- c("EP", "LI", "LS")
+
+```
+
+  Os parâmetros do modelo CAR foram estimados por dois métodos. O primeiro método (método 1) correspondeu a otimização simultânea de todos os parâmetros. Enquanto o segundo método (método 2) correspondeu a otimização do parâmetro $\rho$ e a obtenção analítica do $\beta$ e $\tau$.
+  
+  Os dados espaciais utilizados neste trabalho foram simulados no *software* R. Inicialmente, uma lista de áreas vizinhas foram simuladas para um *grid* (*Lattice*) de células de dimensão $10x10$, totalizando 100 sub-áreas ($A_{ij}$) de dimensão $1x1$. A variável preditora e a variável resposta também foram simuladas para cada sub-área, e os valores dos parâmetros utilizados para simulação foram $\beta_{0} = 10$, $\beta_{1} = 3$, $\tau = 0.5$ e $\rho = 0.5$. Na Figura 1 é possível observar a relação entre as variáveis, onde a correlação entre elas foi de `r round(cor(X, Y), digits = 2)`.
+  
+```{r, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE, include=TRUE, fig.align='center', fig.height=5, fig.width=10, fig.cap="Histograma da distribuição da variável resposta (A) e dispersão dos valores da variável resposta em relação a variável preditora (B)"}
+
+par(mfrow = c(1, 2))
+hist(Y, ylab = "Frequência", xlab = "Classes da variável resposta", main = "A")
+plot(Y ~ X, ylab = "Variável resposta", xlab = "Variável preditora", main = "B")
+par(mfrow = c(1, 1))
+
+```
+
+  O modelo CAR leva em consideração a localização geográfica das áreas e pressupõem-se que há algum tipo de relação de relação entre elas. Neste trabalho, a matriz $\boldsymbol{W}$ de dependência espacial foi obtida pelo critério de adjacência de primeira ordem entre as áreas $A_{ij}$. Assim, a área $A_{i}$ recebia valor 1 se ela apresentava borda comum com a área $A_{j}$, para $i \neq j$, mas recebia valor 0 caso não havia fronteira entre as áreas. Na diagonal principal, ou seja, onde $i = j$, recebeu valor 0 também. A matriz $\boldsymbol{W}$ pode ser observada na Figura 2.
+
+```{r, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE, include=TRUE, fig.align='center', fig.height=5, fig.width=10, fig.cap="Matriz de dependência espacial entre áreas"}
+
+plot(image(W_exemplo, xlab = "Área i", ylab = "Área j"))
+
+```
+
+  Após especificar a matriz $\boldsymbol{W}$, a matriz diagonal $\boldsymbol{D}$ do número total de vizinhos por área foi obtida somando-se todos os locais que fazem fronteira com $A_{j}$. O número de vizinhos entre as áreas variou de 0 a 4, mas com média de 3.6 áreas com fronteiras em comum.
+  
+  O intervalo de confiança.......
+  
+  O resultado do ajuste do modelo CAR pelo método 1 está apresentado na Tabela 1. O valor dos coeficientes estimados foi semelhante com aquele obtido pela função spautolm. O motivo que ocasionou pequenas diferenças entre os valores pode ser atribuido a algum tipo de transformação realizada nos dados, visto que a implementação da função spautolm está otimizada.
+
+```{r, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE, include=TRUE, fig.align='center', fig.height=10, fig.width=10}
+
+kable(x = resultados, 
+      digits = 4, 
+      align = "c", caption = "Estimativa pontual (EP) dos parâmetros do modelo CAR e respectivo intervalo inferior (LI) e superior (LS) de confiança calculados para o método 1")
+
+```
+  
+  O perfil de verossimilhaça para cada parâmetro estimado está apresentado na Figura 3. É importante ressaltar que o parâmetro $\hat{\rho}$ apresentou intervalo de confiança (IC) dentro dos limites esperados de -1 a 1, para esta amostra simuladada. No entanto, como o intervalo de confiança foi obtido por uma aproximação quadrática da função de log-verossimilhança, valores fora do espaço paramétrico podem ser encontrados, pois os IC são sempre simétricos em torno da estimativa pontual, devido a sua forma de construção. O mesmo fato pode ser destacado para o parâmetro de variância $\hat{\tau}$, onde espera-se que os valores estejam no intervalo de 0 a $+\infty$.
+  
+```{r, echo=FALSE, eval=FALSE, message=FALSE, warning=FALSE, include=TRUE, fig.align='center', fig.height=5, fig.width=10}
+
+# Verossimilhança perfilhada
+
+veros_perfil <- profile(metodo_1)
+
+```
+
+```{r, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE, include=TRUE, fig.align='center', fig.height=5, fig.width=10, fig.cap="Perfis de verossimilhança calculados para o método 1"}
+
+plot(veros_perfil)
+
+```
+
+```{r, echo=FALSE, eval=FALSE, message=FALSE, warning=FALSE}
+
+##### Comparar as estimativas provenientes de cada método quando n aumenta
+
+teste_tempo1 <- Sys.time()
+npar <- 4
+N <- 100
+estimados_coef_metodo_1 <- matrix(data = NA, nrow = N, ncol = npar)
+estimados_coef_metodo_1
+estimados_coef_metodo_spautolm <- matrix(data = NA, nrow = N, ncol = npar)
+estimados_coef_metodo_spautolm
+
+for(i in 1:N){
+  
+  # Variável Y e X
+  Y <- as.numeric(rmvnorm(1, mean = mu, sigma = solve(sigma)))
+  X <- seq(-1,1,length.out = 100)
+  mu <- intercepto + angular * X
+  
+  # coeficientes estimados pelo modelo do metodo 1
+  
+  metodo_1 <- mle2(minuslogl = LV1, 
+     start = list("b0" = (10), "b1" = (2), "rho" = (0.2), "tau" = (0.5)), 
+     method = "BFGS", 
+     data = list("y" = Y, "x" = X, "W" = W, "D" = D), 
+     lower = c(-100, -100, -0.99, -10), 
+     upper = c(100, 100, 0.99, 100), 
+     hessian.opts = FALSE)
+  
+  estimados_coef_metodo_1[i, ] <- c(coef(metodo_1)[1:3], exp(coef(metodo_1)[4]))
+
+  # coeficientes estimados pelo modelo ajustado no pacote spautolm 
+  
+  a <- spautolm(Y ~ X, listw = lista_vizinhos, family = "CAR")
+  
+  estimados_coef_metodo_spautolm[i, ] <- c(coef(a), sqrt(var(residuals(a))))
+  
+  estimados_coef_metodo_spautolm[i, ]
+}
+
+#estimados_coef_metodo_1
+#estimados_coef_metodo_spautolm
+teste_tempo2 <- Sys.time()
+
+teste_tempo2 - teste_tempo1
+
+##### Exportar os dados simulados para arquivo csv
+
+#write.table(x = estimados_coef_metodo_1, file = "est.coef.m1.csv", sep = '\t')
+#write.table(x = estimados_coef_metodo_spautolm, file = "est.coef.mspautolm.csv", sep = '\t')
+
+```
+
+  Como os parâmetros apresentaram discrepância entre aqueles obtidos pelo método 1 e pela função spautolm, a relação entre os mesmos foi estudada e pode ser observada na Figura 4. Nota-se que há uma forte relação linear positiva entre os parâmetros estimados, conforme era  esperado inicialmente.
+
+```{r, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE, include=TRUE, fig.align='center', fig.height=10, fig.width=12, fig.cap="Relação entre os parâmetros estimados pelo método 1 e pela função spautolm"}
+
+# Importar arquivos da simulação dos coeficientes estimados por diferentes métodos
+
+estimados_coef_metodo_1 <- read.table("est.coef.m1.csv", header = TRUE, sep = "\t")
+estimados_coef_metodo_spautolm <- read.table("est.coef.mspautolm.csv", header = TRUE, sep = "\t")
+
+
+par(mfrow=c(2,2))
+plot(estimados_coef_metodo_1[ , 1] ~ estimados_coef_metodo_spautolm[ , 1], 
+ylab = "b0 (método 1)", 
+xlab = "b0 (spautolm)")
+plot(estimados_coef_metodo_1[ , 2] ~ estimados_coef_metodo_spautolm[ , 2], 
+ylab = "b1 (método 1)", 
+xlab = "b1 (spautolm)")
+plot(estimados_coef_metodo_1[ , 3] ~ estimados_coef_metodo_spautolm[ , 3], 
+ylab = "rho (método 1)", 
+xlab = "rho (spautolm)")
+plot(exp(1/log(estimados_coef_metodo_1[ , 4])) ~ c(estimados_coef_metodo_spautolm[ , 4]^2), 
+ylab = "tau (método 1)", 
+xlab = "tau (spautolm)")
+par(mfrow=c(1,1))
+
+```
+
+# Discussão e Conclusão
+
+  ...
+
+# Referências
+
+

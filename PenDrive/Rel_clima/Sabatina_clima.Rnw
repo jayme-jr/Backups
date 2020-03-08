@@ -1,0 +1,144 @@
+\documentclass[a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+
+% Referências no estilo ABNT
+% Usar no R 'citation()' para citar o R ou pacotes
+%\usepackage[alf]{abntex2cite}
+%\usepackage[alf, abnt-emphasize=bf]{abntcite}
+\usepackage{natbib}
+
+
+\usepackage{geometry}
+\geometry{a4paper, left=40mm, right=40mm, top=25mm, bottom=25mm}
+
+% Cores: http://latexcolor.com/.
+\usepackage{xcolor}
+\definecolor{ballblue}{rgb}{0.13, 0.67, 0.8}
+\newcommand{\tc}[1]{\textcolor{ballblue}{#1}}
+
+\usepackage{graphics}
+\usepackage{hyperref}
+\usepackage{float}
+\hypersetup{colorlinks = true}
+<<echo=FALSE, results=hide>>=
+library(xtable)
+library("ggplot2") 
+library("lattice")
+dados <- read.csv("dados.csv")
+per_in <- dados[["data"]][1]
+q <- length(dados$data)
+per_fin <- dados[["data"]][q]
+per_in
+per_fin
+per_dias <- length(levels(dados$data))
+horas <- length(dados$hora)
+prec_lim <- trunc(max(dados$precipitacao))
+url <- "http://www.inmet.gov.br/portal/index.php?r=estacoes/estacoesAutomaticas"
+u <- max(dados$precipitacao)
+v <- dados$data[dados$precipitacao == u]
+v
+if(u > 0){
+  prec <- sprintf("O dia com maior precipitação no período foi %s com precipitação de %0.1fmm", v, u )
+}else{
+  prec <- sprintf("Não houve precipitação no período")
+  }
+
+
+@
+
+\title{Análise do Clima em Colombo para o período \tc{\Sexpr{per_in}} a \tc{\Sexpr{per_fin}}}
+\author{Acadêmico Jayme Gomes dos Santos Junior}
+\date{}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+%\bibliographystyle{abnt-alf}
+%\bibliographystyle{plainnat}
+\maketitle
+
+Este relatório utiliza os dados climáticos da cidade de Colombo no período de \tc{\Sexpr{per_dias}} dias compreendidos entre \tc{\Sexpr{per_in}} e \tc{\Sexpr{per_fin}}.
+
+ \tc{\Sexpr{prec}}, como mostra a figura\ref{plot}.
+
+\begin{figure}[h]
+<<echo=False, fig=TRUE, height=4, width=6>>=
+#no begin{figure}[h], 'h' é para q a figura fique na mesma posição do documento
+plot(dados$precipitacao, xlab = "Horas", ylab = "Precipitação em mm",
+     yaxp = trunc(c(0, prec_lim, 5)), xaxp = c(0, horas, horas/24),
+     las = 1, type = "l", lwd = 3, col = "darkblue", cex = 2)
+@
+\caption{Precipitação registrada a cada hora em Colombo.}\label{plot}
+\end{figure}
+
+<<echo=FALSE, results=tex>>=
+#results=tex significa que será ciada a tabela resultante do xtab será passada para latex
+df <- dados[, -c(1, 3, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
+                17, 18, 19, 20)]
+
+i <- 1
+temp_m <- c()
+temp_min <- c()
+temp_max <- c()
+
+while(i <= length(levels(df$data))){
+  x <- levels(df$data)[i]
+  temp_m[i] <- mean(df$temp_inst[df$data == x])
+  temp_min[i] <- min(df$temp_min[df$data == x])
+  temp_max[i] <- max(df$temp_max[df$data == x])
+  i <- i+1
+}
+
+df2 <- data.frame("Data" = levels(dados$data), "Temperatura Média" = temp_m,
+                  "Temperatura Máxima" = temp_max, "Temperatura Mínima" = temp_min)
+
+xtab <- xtable(df2, 
+               caption = "Mostra a temperatura média, máxima e mínima de cada dia do período",
+               label = "xtable", float = FALSE)
+print(xtab)
+tm <- max(xtab$Temperatura.Média)
+
+d1 <- xtab$Data[xtab$Temperatura.Média == tm]
+
+ta <- max(xtab$Temperatura.Máxima)
+
+d2 <- xtab$Data[xtab$Temperatura.Máxima == ta]
+
+tb <- min(xtab$Temperatura.Mínima)
+
+d3 <- xtab$Data[xtab$Temperatura.Mínima == tb]
+
+
+@
+
+\tc{\Sexpr{d1}} foi o dia com a temperatura média mais alta, \tc{\Sexpr{tm}}°C.
+Já a temperatura mais baixa de todo o período foi \tc{\Sexpr{tb}}°C no dia \tc{\Sexpr{d3}}
+e a mais alta ocorreu no dia \tc{\Sexpr{d2}} alcançando \tc{\Sexpr{ta}}°C.
+
+\begin{figure}[H]
+<<echo=FALSE, fig=TRUE>>=
+lattice:::xyplot(temp_inst ~ precipitacao | data, data = dados, between = list(y = 1),
+                 scale = list(alternating = FALSE), col = "red", las = 1, cex = 2,
+                 xlab = "Precipitação em mm", ylab = "Temperatura em °C") 
+
+@
+\caption{Relação entre a temperatura e precipitação a cada dia.}\label{xyplot}
+\end{figure}
+
+Já na figura\ref{xyplot}, vemos a relação entre a temperatura e a precipitação em cada dia
+do período.\\
+
+Todo o relatório foi feito utilizando o R.\citep{r}\\
+
+Na figura\ref{plot}, foi utilizado o pacote 'ggplot2'.\citep{ggplot2}\\
+
+Na tabela\ref{xtable}, usou-se o pacote 'xtable'.\citep{xtable}\\
+
+E o pacote 'lattice'\citet{lattice} para a figura\ref{xyplot}.\\
+
+%Referências bibliográficas
+\bibliographystyle{abbrvnat}
+\bibliography{ref}
+
+\end{document}

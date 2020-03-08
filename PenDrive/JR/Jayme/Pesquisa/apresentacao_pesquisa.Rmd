@@ -1,0 +1,205 @@
+%----------------------------------------------------------------------------------------
+%	Pacotes e Temas
+%----------------------------------------------------------------------------------------
+
+\documentclass{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\mode<presentation> {
+
+%--------------------------------------------------
+% Lista de temas(testei um por um haha)
+
+%\usetheme{default}
+%\usetheme{AnnArbor}
+%\usetheme{Antibes}
+%\usetheme{Bergen}
+%\usetheme{Berkeley}
+\usetheme{Berlin}
+%\usetheme{Boadilla}
+%\usetheme{CambridgeUS}
+%\usetheme{Copenhagen}
+%\usetheme{Darmstadt}
+%\usetheme{Dresden}
+%\usetheme{Frankfurt}
+%\usetheme{Goettingen}
+%\usetheme{Hannover}
+%\usetheme{Ilmenau}
+%\usetheme{JuanLesPins}
+%\usetheme{Luebeck}
+%\usetheme{Madrid}
+%\usetheme{Malmoe}
+%\usetheme{Marburg}
+%\usetheme{Montpellier}
+%\usetheme{PaloAlto}
+%\usetheme{Pittsburgh}
+%\usetheme{Rochester}
+%\usetheme{Singapore}
+%\usetheme{Szeged}
+%\usetheme{Warsaw}
+
+%--------------------------------------------
+
+% Mudar a cor do tema.(decidi não mexer)
+
+%\usecolortheme{albatross}
+%\usecolortheme{beaver}
+%\usecolortheme{beetle}
+%\usecolortheme{crane}
+%\usecolortheme{dolphin}
+%\usecolortheme{dove}
+%\usecolortheme{fly}
+%\usecolortheme{lily}
+%\usecolortheme{orchid}
+%\usecolortheme{rose}
+%\usecolortheme{seagull}
+%\usecolortheme{seahorse}
+%\usecolortheme{whale}
+%\usecolortheme{wolverine}
+
+%-----------------------------------------------------------------
+
+%\setbeamertemplate{footline} % Remover o rodapé de todas as páginas
+%\setbeamertemplate{footline}[page number] % Trocar o rodapé pelo nr de páginas
+%\setbeamertemplate{navigation symbols}{} % Remove todos os símbolos de progresso dos slides
+}
+
+\usepackage{graphicx} % Allows including images
+\usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
+
+%----------------------------------------------------------------------------------------
+%	Capa
+%----------------------------------------------------------------------------------------
+
+\title[Estatística Aplicada a Geopolítica]{Análise do Impacto Socioeconômico de Serviços Inovadores que Competem com Monopólios ou Cartéis} % o que está dentro dos [] aparecerá em todos os slides e dentro das {} aparecerá na capa
+\author{Jayme Gomes dos Santos Junior} 
+\institute[Pet Estatística-UFPR] % como não consegui colocar a imagem, foi assim que fiz para ter ao menos o nome do pet em todos os slides
+{
+Universidade Federal do Paraná \\ % 
+\medskip
+%\textit{jaymegomesdossantosjunior@gmail.com} % e-mail(decidi não deixar)
+}
+%\date{\today} % data(decidi não deixar)
+
+%-------------------------------------------------------------------------------------
+
+\begin{document}
+
+\begin{frame}
+\titlepage % Mostra a capa como primeiro slide
+\end{frame}
+
+\begin{frame}
+\frametitle{Índice} % Sumário
+\tableofcontents % Se forem acrescentadas sessões e subsessões, com esse comando, elas serão colocadas automaticamente no sumário
+\end{frame}
+
+%----------------------------------------------------------------------------------------
+%	Slides
+%----------------------------------------------------------------------------------------
+
+%------------------------------------------------
+\section{Motivação} 
+%------------------------------------------------
+
+\subsection{Teoria de Rifkin} 
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Motivação}
+\pause
+\begin{itemize}
+\item Teoria de Rifkin
+\pause
+\item Eclipse do capitalismo como conhecemos
+\pause
+\item Mudança de paradigma econômico
+\pause
+\item Terceira revolução industrial
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------
+\section{Materiais de Apoio}
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Livro}
+\begin{itemize}
+\item The Zero Marginal Cost Society - The Internet of Things(Jeremy Rifkin)
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Artigos}
+\begin{itemize}
+\item Medidas de nível socioeconômico em pesquisas sociais(Maria Tereza Gonzaga alves e José Francisco Soares)
+\pause
+\item Grau de monopólio e teste de Granger(Luiz dias Bahia)
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------
+\section{Ferramentas}
+%------------------------------------------------
+
+\subsection{Mendeley}
+
+\begin{frame}
+\frametitle{Gerenciamento de Bibliografia}
+\begin{itemize}
+\item Organização
+\item Gerenciamento
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------
+
+\subsection{R}
+
+\begin{frame}
+\frametitle{Mineração de Texto}
+\pause
+\begin{itemize}
+\item Tweeter - API e pacote R
+\pause
+\item Pacote Selenium para o Google Play
+\pause
+\item Ferramentas de manipulação de texto
+\pause
+\item Análise posterior
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------
+\section{Desafios}
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Hiato}
+\begin{itemize}
+\item Desorganização
+\item Tempos difíceis
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Duvidas}
+\begin{itemize}
+\item Pós leitura de materiais
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\Huge{\centerline{OBRIGADO!}}
+\end{frame}
+
+%----------------------------------------------------------------------------------------
+\end{document}

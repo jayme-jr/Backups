@@ -1,0 +1,25 @@
+---
+title: "Trabalho 7"
+author: "Rafael Morciani"
+date: "5 de setembro de 2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Trabalho 7
+Pela lógica o tamanho da amostra quando o erro relativo tende para zero é igual a N.
+Prove isso matematicamente (Prove usando a regra de L'Hopital)
+
+$$n_0=(\frac{ts}{r\bar{y}}) ^2$$
+$$n=\frac{n_0}{1+\frac{n_0}{N}}$$
+$$\lim_{r \rightarrow 0}n=\lim_{r \rightarrow 0}\frac{n_0}{1+\frac{n_0}{N}}=\lim_{r \rightarrow 0}\frac{(\frac{ts}{r\bar{y}})^2}{1+\frac{(\frac{ts}{r\bar{y}})^2}{N}}=\lim_{r \rightarrow 0}N\frac{(\frac{ts}{r\bar{y}})^2}{N+(\frac{ts}{r\bar{y}})^2}=\frac{\infty}{\infty} Indeterminação$$
+Aplicando L'Hopital
+$$\frac{d(N(\frac{ts}{r\bar{y}})^2)}{dr}=N2(\frac{ts}{r\bar{y}})(\frac{-ts}{r^2\bar{y}})$$
+$$\frac{d(N+(\frac{ts}{r\bar{y}})^2)}{dr}=2(\frac{ts}{r\bar{y}})(\frac{-ts}{r^2\bar{y}})$$
+Assim temos:
+$$\lim_{r \rightarrow 0}\frac{N2(\frac{ts}{r\bar{y}})(\frac{-ts}{r^2\bar{y}})}{2(\frac{ts}{r\bar{y}})(\frac{-ts}{r^2\bar{y}})}=N$$
+Logo provamos que:
+$$\lim_{r \rightarrow 0}n=N$$

@@ -1,0 +1,83 @@
+/*************************************************
+ *  An Example Grey Theme for Hugo Academic
+ *  Set `custom_css = ["grey.css"] in `config.toml`.
+ *  Then save this file as `/static/css/grey.css` relative to your website root (i.e. not in `themes/academic` directory).
+ **************************************************/
+
+a,
+a:visited,
+h3.article-title a:hover {
+    color: rgb(100, 100, 100);
+}
+
+a:hover {
+    color: rgb(74, 74, 74);
+}
+
+.navbar-default .navbar-nav li a:hover,
+.btn-primary,
+.btn-primary.btn-outline {
+    color: rgb(100, 100, 100);
+}
+
+/* Articles */
+
+.article-title a {
+    color: #585858;
+}
+
+.article-metadata a {
+    color: #888888;
+}
+
+.article-metadata a:hover {
+    color: rgb(100, 100, 100);
+}
+
+/* Standard buttons */
+
+.btn-primary,
+.btn-primary.btn-outline {
+    border-color: rgb(100, 100, 100);
+}
+
+/* Hover buttons */
+
+.btn-primary.btn-outline:hover {
+    border-color: rgb(100, 100, 100);
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-primary.active,
+.btn-primary:visited,
+.btn-primary.btn-outline:active {
+    background-color: rgb(100, 100, 100);
+}
+
+/* Navbar buttons */
+
+.navbar-default .navbar-nav>.active>a,
+.navbar-default .navbar-nav>.active>a:focus,
+.navbar-default .navbar-nav>.active>a:hover {
+  color: rgb(100, 100, 100);
+  font-weight: 700;
+  background-color: transparent !important; /* Override Bootstrap. */
+}
+
+/* Toolbar buttons */
+
+.btn-toolbar .btn.btn-primary {
+  background: rgb(74, 74, 74);
+}
+
+.btn-toolbar .btn.btn-primary:hover,
+.btn-toolbar .btn.btn-primary:focus {
+  background-color: rgba(189, 189, 189, 1);
+}
+
+.btn-toolbar .btn.btn-primary:active,
+.btn-toolbar .btn.btn-primary.active {
+  background-color: rgba(189, 189, 189, 1);
+}

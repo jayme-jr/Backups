@@ -1,0 +1,9 @@
+---
+title: "Planejamento - Minicurso_R"
+author: "Jayme Junior"
+output: html_document
+---
+
+
+#Atividade - Minicurso R 
+------------------------------------------------------------------------

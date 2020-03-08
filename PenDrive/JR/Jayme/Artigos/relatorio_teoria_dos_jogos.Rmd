@@ -1,0 +1,29 @@
+---
+author: "Jayme Junior"
+date: "8 de março de 2017"
+output: pdf_document
+---
+
+# Relatório teoria dos jogos
+
+Relatou o processo que levou ao surgimento da teoria dos jogos como 
+conhecemos hj, mostrando vários trabalhos de matemáticos e estudiosos.
+
+A forma normal de jogo, onde os jogadores escolhem suas estratégias 
+simultâneamente ou sem conhecer a estratégia dos outros.
+
+A maneira de organizar as estratégias possíveis e seus resultados em 
+modelos matemáticos, basicamente com matrizes de *payoffs*.
+
+Teve como principal enfoque o equilíbrio de Nash que visa a solução de 
+um jogo onde os jogadores saiam com o menor prejuízo possível com base
+em qualquer uma das estratégias(puras, mistas) e em qualquer tipo de 
+jogo. O teorema minimax de Von Newmann é usado como apoio a força do 
+teorema do equilíbrio de nash, mostrando que qualquer jogo definido por
+uma matriz de *payoff* tem um equilíbrio de Nash em estratégias mistas.
+
+A forma extensa de jogo, onde os jogadores formam sua estratégia de 
+forma reativa, ou seja, após ver a ação de outro jogador, representados
+por alfabetos e árvores.
+
+Tudo exemplificado com vários problemas de jogos.

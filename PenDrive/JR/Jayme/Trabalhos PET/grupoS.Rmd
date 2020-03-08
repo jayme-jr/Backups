@@ -1,0 +1,244 @@
+---
+title: "Avaliação do Tutor PET S"
+header-includes:
+  - \usepackage{float}
+output: 
+  pdf_document
+geometry:
+  margin = 1.5cm
+---
+
+```{r setup, include=FALSE}
+
+setwd("~/Área de Trabalho/JR/Jayme")
+
+## ---------------------------------------------------------------------
+library(reshape)
+library(lattice)
+library(xtable)
+
+ps <- list(strip.background = list(col = c("gray80", "gray50")))
+trellis.par.set(ps)
+
+# Leitura e organização dos dados
+
+dados <- read.table("av_tutores.txt", header = TRUE, sep = "\t")
+
+# Retirando a coluna dos GRR e as perguntas abertas
+da <- dados[, - c(2, 19, 20)]
+
+# Renomeando as perguntas
+names(da) <- c("grupo.PET", "x1", "x2", "x3", "x4", "x5",
+               "x6", "x7", "x8", "x9", "x10", "x11", "x12",
+               "x13", "x14", "x15", "x16")
+
+# Codificando os grupos PET
+levels(da$grupo.PET) <- LETTERS[1:21]
+
+# Alterando formata do data.frame
+db <- melt(da, id.vars = "grupo.PET")
+
+dc <- aggregate(cbind(y = value) ~ value + variable + grupo.PET,
+                data = db, 
+                FUN = length)
+
+dc$value <- factor(dc$value, ordered = TRUE,
+                   levels = levels(dc$value)[c(5, 2, 1, 4, 3, 7, 6)])
+
+# Apelido das perguntas
+apelido <- c("Freq. reuniões", 
+             "Freq. eventos", 
+             "Incentiva", 
+             "Afazeres", 
+             "Disponível",
+             "Custeio",
+             "Participa",
+             "Normativas",
+             "Ideologias",
+             "Receptivo",
+             "Planejamento",
+             "Supervisiona",
+             "Cond. ética",
+             "Descumprimento",
+             "Favorece",
+             "Proativo")
+
+# Selecionando o grupo PET
+da1 <- subset(dc, grupo.PET == "S")
+
+```
+
+## Questões avaliadas
+
+**x1.** Qual a frequência da tutora ou do tutor nas reuniões do grupo?
+
+**x2.** Qual a frequência da tutora ou do tutor nos eventos/atividades
+do PET?
+
+**x3.** A tutora ou o tutor incentiva a participação em eventos
+nacionais e regionais do PET?
+
+**x4.** A tutora ou o tutor cumpre com seus afazeres dentro dos prazos?
+
+**x5.** Quão disponível é a tutora ou o tutor para fazer orientação
+individualizada sobre aspectos acadêmicos e pessoais as alunas e os
+alunos?
+
+**x6.** A aplicação da verba de custeio é discutida com o grupo?
+
+**x7.** A tutora ou o tutor participa e não apenas delega tarefas?
+
+**x8.** A tutora ou o tutor compartilha as normativas do programa com as
+alunas e os alunos, bem com atualizações referentes ao programa?
+
+**x9.** A tutora ou o tutor respeita ideologias que diferem das suas,
+desde que não firam princípios contidos na declaração de direitos
+humanos bem como na constituição da República Federativa do Brasil?
+
+**x10.** A tutora ou o tutor é receptivo a sugestões das e dos petianos 
+para projetos de ensino, pesquisa e extensão do grupo?
+
+**x11.** A tutora ou o tutor planeja as atividades do grupo juntamente
+com os petianos?
+
+**x12.** A tutora ou o tutor supervisiona e orienta as ações dos
+integrantes do grupo?
+
+**x13.** A tutora ou o tutor promove discussões sobre condutas éticas
+que auxiliem na formação do petianos?
+
+**x14.** A tutora ou o tutor aplica adequadamente as consequências
+previstas para o descumprimento das obrigações do termo de compromisso e
+tarefas designadas por deliberações coletivas do grupo?
+
+**x15.** A tutora ou o tutor, de alguma forma, favorece alguma ou algum
+petiano em detrimento de outros?
+
+**x16.** A tutora ou o tutor se mostra proativo para buscar, junto a
+instâncias superiores e colegas de trabalho, soluções para suprir
+demandas materiais e administrativas do grupo?
+
+\pagebreak
+
+## Resultados
+
+**Quantidade de respostas:** 3
+
+```{r grafico, echo = FALSE, fig.height=9, fig.width=11, out.width="0.9\\textwidth", fig.align='center'}
+
+fl <- paste0("(", levels(da1$variable), ") ", apelido)
+barchart(value ~ y | variable,
+         data = da1,
+         as.table = TRUE,
+         layout = c(4, 4),
+         xlab = "Frequências observadas",
+         col = "navyblue",
+         strip = strip.custom(
+           factor.levels = fl  
+         ),
+         panel = function(...) { 
+             args <- list(...)
+             panel.text(args$x, args$y, args$x, pos = 4, offset = 1)
+             panel.barchart(...)
+         })
+
+```
+
+INTERPRETAÇÃO GRÁFICO
+
+Neste gráfico as barras azuis representam quantos integrantes do PET 
+responderam cada alternativa das 16 perguntas.
+Segundo a avaliação dos petianos e petianas, o tutor ou tutora se faz 
+presente nas reuniões, discute as atividades, participa delas e as 
+supervisiona, incentiva a participação dos integrantes em eventos, 
+cumpre seus afazeres em dia e respeita ideologias diferentes. Já as 
+outras respostas onde houve diferença entre as respostas dificultou a
+análise, dado o número pequeno de integrantes que responderam.
+
+
+\begin{minipage}{0.65\textwidth}
+
+```{r, echo=FALSE, results="asis"}
+
+# atribui scores para as respostas
+da1$int <- as.integer(da1$value)
+da1$int[da1$int > 5] <- NA
+
+# Realiza as medidas resumo
+lista <- lapply(split(da1, da1$variable), function(data) {
+    with(na.omit(data), {
+        val <- rep(int, y)
+        c("Média" = mean(val),
+          "Moda" = as.integer(names(which.max(table(val)))),
+          "Desvio Padrão" = sd(val),
+          "Total" = length(val)
+        )
+    })    
+})
+
+tabela <- do.call(rbind, lista)
+rownames(tabela) <- fl
+
+# cria tabela com formatação correta
+print(xtable(tabela,
+             align = "lcccc",
+             digits = c(0, 2, 0, 2, 0)),
+      comment = FALSE,
+      caption.placement = "top",
+      table.placement = "H"
+)
+      
+```
+
+\end{minipage}
+\begin{minipage}{0.35\textwidth}
+
+\footnotesize
+Para a construção da tabela, assumiu-se valores de 1 a 5 para os pontos
+da escala sendo:
+
+\begin{itemize}
+\tightlist
+\item
+  Valor 1 para alternativa sempre;
+\item
+  Valor 2 para alternativa frequentemente;
+\item
+  Valor 3 para alternativa às vezes;
+\item
+  Valor 4 para alternativa raramente;
+\item
+  Valor 5 para alternativa nunca.
+\end{itemize}
+
+As estatísticas apresentadas são:
+
+\begin{itemize}
+\tightlist
+\item
+  Média: Média aritmética dos pontos da escala;
+\item
+  Moda: Classe de maior frequência;
+\item
+  Desvio padrão: Representa a variabilidade das respostas;
+\item
+  Total: Total de respostas válidas.
+\end{itemize}
+
+{\bf Obs.:} as alternativas não sei e não se aplica foram
+desconsideradas
+
+\end{minipage}
+
+INTERPRETAÇÃO TABELA
+
+A tabela mostra uma média simples das respostas por questão com base na
+escala ao lado da tabela, a moda que é a alternativa mais escolhida para
+cada questão e o desvio padrão de cada questão, quanto maior o valor do 
+desvio, mais as respostas se distanciam da média, desconsiderando as 
+respostas "não sei" e "não se aplica".
+Fica evidente que os petianos e petianas tem respostas parecidas na
+maioria das questões, dado o desvio padrão pequeno, chegando a ter
+unanimidades nas questões x3, x10 e x13, onde o desvio é zero. Única 
+exceção é a x14 que não tem desvio, pois só teve uma resposta 
+considerada.

@@ -1,0 +1,218 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={Trabalho de Métodos de Amostragem},
+            pdfauthor={Jayme Gomes dos Santos Junior},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{5}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\newcommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{Trabalho de Métodos de Amostragem}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+    \author{Jayme Gomes dos Santos Junior}
+    \preauthor{\centering\large\emph}
+  \postauthor{\par}
+      \predate{\centering\large\emph}
+  \postdate{\par}
+    \date{Curitiba 2018}
+
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage[table]{xcolor}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+
+\usepackage{float} \usepackage[brazil]{babel} \usepackage{amsmath} \usepackage{bm} \usepackage{graphicx}
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{2}
+\tableofcontents
+}
+\newpage
+
+\section{Trabalho 1}\label{trabalho-1}
+
+\subsection{Teorema 1}\label{teorema-1}
+
+Tendo uma população de tamanho \textbf{N}, ao extrair uma amostra de
+tamanho \textbf{n}, temos que o estimador não evezado para
+\(\overline{Y}\) é: \[
+\overline{y} = \sum_{i=1}^n\dfrac{y_i}{n}
+\]
+
+\subsection{Exercício}\label{exercicio}
+
+\begin{table}
+
+\caption{\label{tab:unnamed-chunk-1}População de Tamanho N = 6}
+\centering
+\begin{tabular}[t]{clc|clc}
+\hline
+População & Valores\\
+\hline
+y1 & 2\\
+\hline
+y2 & 4\\
+\hline
+y3 & 5\\
+\hline
+y4 & 7\\
+\hline
+y5 & 8\\
+\hline
+y6 & 9\\
+\hline
+\end{tabular}
+\end{table}
+
+\newpage
+
+Com base na população dada na tabela 1, encontrar a média de todas as
+combinações possíveis de amostras de tamanhos: n = 2, n = 3 e n = 4.
+
+\subsubsection{Resolução}\label{resolucao}
+
+Sabendo que a média populacional é dada por:
+
+\[
+\overline{Y} = \sum_{i=1}^N\dfrac{y_i}{N} = \dfrac{2+4+5+7+8+9}{6} = 5.833
+\] O objetivo é mostrar que a média de todas as combinações de amostras
+possíveis terão o mesmo valor da média populacional.
+
+\emph{OBS:} ys = médias amostrais, P(ys) = probabilidade de cada amostra
+acontecer e ys.P(ys) = média amostral multiplicada pela sua
+probabilidade.
+
+\newpage
+
+\paragraph{Para n = 2, temos:}\label{para-n-2-temos}
+
+\begin{table}
+
+\caption{\label{tab:unnamed-chunk-1}Amostras Possíveis com n = 2}
+\centering
+\begin{tabular}[t]{clc|clc|clc|clc}
+\hline
+Amostra & ys & P(ys) & ys.P(ys)\\
+\hline
+2,4 & 3 & 1/15 & 0.2\\
+\hline
+2,5 & 3.5 & 1/15 & 0.23\\
+\hline
+2,7 & 4.5 & 1/15 & 0.3\\
+\hline
+2,8 & 5 & 1/15 & 0.33\\
+\hline
+2,9 & 5.5 & 1/15 & 0.37\\
+\hline
+4,5 & 4.5 & 1/15 & 0.3\\
+\hline
+4,7 & 5.5 & 1/15 & 0.37\\
+\hline
+4,8 & 6 & 1/15 & 0.4\\
+\hline
+4,9 & 6.5 & 1/15 & 0.43\\
+\hline
+5,7 & 6 & 1/15 & 0.4\\
+\hline
+5,8 & 6.5 & 1/15 & 0.43\\
+\hline
+5,9 & 7 & 1/15 & 0.47\\
+\hline
+7,8 & 7.5 & 1/15 & 0.5\\
+\hline
+7,9 & 8 & 1/15 & 0.53\\
+\hline
+8,9 & 8.5 & 1/15 & 0.57\\
+\hline
+\end{tabular}
+\end{table}
+
+Comparando os resultados das médias populacional e amostral com n = 2,
+temos que:
+
+Média populacional 5.83 = Média de todas as amostras possíveis de
+tamanho 2 5.83
+
+
+\end{document}

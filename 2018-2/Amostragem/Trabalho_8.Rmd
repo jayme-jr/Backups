@@ -1,0 +1,44 @@
+---
+title: "Trabalho 8"
+author: "Rafael Morciani/GRR:20160217"
+date: "18 de setembro de 2017"
+output:
+  pdf_document: default
+---
+
+## Trabalho 8
+Assinaturas para uma petição foram coletadas em 676 páginas, cada página tem espaço suficiente para 42 assinaturas, mas em muitas delas um número menor de assinaturas foi coletado. Os números de assinaturas por folha foram coletados em uma amostra aleatória de 50 folhas com os resultados mostrados na tabela abaixo. 
+
+Com base nestas informações, estime o número total de assinaturas da petição e os limites de um intervalo com 80% de confiança.
+
+
+```{r , echo=FALSE}
+y <- matrix(data=c(42,41,36,32,29,27,23,19,16,15,14,11,10,9,7,6,5,4,3,23,4,1,1,1,2,1,1,2,2,1,1,1,1,1,3,2,1,1),nrow=19,ncol = 2)
+y
+```
+Primeira coluna: Número de assinaturas por página
+
+Segunda coluna: Frequência
+
+N=676 Páginas
+n=50 Páginas
+$\alpha$=0,2
+$t_{49}$=1,299
+
+$$a=\frac{total\ de\ assinaturas\ na\ amostra}{Total\ de\ assinaturas\ que\ cabem\ por\ folha}$$
+a: Folhas completas de assinaturas
+$$a=\frac{1471}{42}=35$$ 
+$$p=\frac{a}{n}=\frac{35}{50}=0,70$$
+A = Np = 676 \* 42 \* 0,7 = 19874 Assinaturas
+$$I.C = p \pm[ t_{49}\sqrt{\frac{N-n}{N}}\sqrt{\frac{pq}{n-1}}+\frac{1}{2n}]$$ 
+$$I.C = 0,7 \pm[ 1,299\sqrt{\frac{676-50}{676}}\sqrt{\frac{0,7*0,3}{50-1}}+\frac{1}{2*50}]$$
+$$I.C = [0,7\pm 0,09] = [0,61;0,79]$$ Interpretação do I.C encontrado: 80% de confiança que a proporção do total de folhas completas de assinaturas está no intervalo de confiança calculado.
+
+*Calculando o total de assinaturas:*
+
+Multiplicaremos os limites do I.C encontrado pelo total de páginas e pelo número máximo de assinaturas por página, assim temos:
+
+$$0,61 * 676 * 42 = 17267$$
+$$0,79 * 676 * 42 = 22482$$
+
+Logo temos o I.C para o total de assinaturas coletadas com 80% de confiança do verdadeiro valor estar nele: IC = [17267;22482] Assinaturas.

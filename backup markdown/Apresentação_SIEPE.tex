@@ -1,0 +1,116 @@
+\documentclass[ignorenonframetext,]{beamer}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{caption label separator}{: }
+\setbeamercolor{caption name}{fg=normal text.fg}
+\beamertemplatenavigationsymbolsempty
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+\usetheme[]{Wolwerine}
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\newif\ifbibliography
+\hypersetup{
+            pdftitle={A problemática dos acidentes de trânsito na Região Metropolitana de Curitiba utilizando a estatística espacial},
+            pdfauthor={Marcelo José Martins Júnior},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+
+% Prevent slide breaks in the middle of a paragraph:
+\widowpenalties 1 10000
+\raggedbottom
+
+\AtBeginPart{
+  \let\insertpartnumber\relax
+  \let\partname\relax
+  \frame{\partpage}
+}
+\AtBeginSection{
+  \ifbibliography
+  \else
+    \let\insertsectionnumber\relax
+    \let\sectionname\relax
+    \frame{\sectionpage}
+  \fi
+}
+\AtBeginSubsection{
+  \let\insertsubsectionnumber\relax
+  \let\subsectionname\relax
+  \frame{\subsectionpage}
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+
+\title{A problemática dos acidentes de trânsito na Região Metropolitana de
+Curitiba utilizando a estatística espacial}
+\author{Marcelo José Martins Júnior}
+\date{PET-Estatística}
+
+\begin{document}
+\frame{\titlepage}
+
+\begin{frame}{Objetivos}
+
+\begin{itemize}[<+->]
+\item
+  Objetivo geral: Indicar qual setor relacionado ao trânsito de Curitiba
+  e Região Metropolitana (RMC), possui maior concentração de acidentes
+  de trânsito.
+\item
+  Objetivos específicos:
+\end{itemize}
+
+\begin{enumerate}[<+->]
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Indicar o setor de maior problemática geoespacial na concentração de
+  acidentes;
+\item
+  Com o uso da estatística espacial, bem como, informações de órgãos de
+  monitoramento do trânsito de Curitiba e RMC, estudar as regiões e
+  setores deficientes na questão de concentração de acidentes;
+\item
+  Comparar e analisar os dados da pesquisa de estatística espacial, e os
+  dados existentes fornecidos por grandes órgãos do estado.
+\end{enumerate}
+
+\end{frame}
+
+\begin{frame}{O que é a Estatística Espacial?}
+
+\begin{itemize}[<+->]
+\item
+  Conjunto de métodos de análise de dados em que a localização
+  geográfica é usada explicitamente na modelagem
+\item
+  Vale ressaltar que nem todos os dados fazem uso da estatística
+  espacial na análise.
+\end{itemize}
+
+\end{frame}
+
+\end{document}

@@ -1,0 +1,66 @@
+\begin{table}
+
+\caption{\label{tab:unnamed-chunk-1}População de Tamanho N = 6}
+\centering
+\begin{tabular}[t]{clc|clc}
+\hline
+População & Valores\\
+\hline
+y1 & 2\\
+\hline
+y2 & 4\\
+\hline
+y3 & 5\\
+\hline
+y4 & 7\\
+\hline
+y5 & 8\\
+\hline
+y6 & 9\\
+\hline
+\end{tabular}
+\end{table}
+\efloatseparator
+ 
+\begin{table}
+
+\caption{\label{tab:unnamed-chunk-1}Amostras Possíveis com n = 2}
+\centering
+\begin{tabular}[t]{clc|clc|clc|clc}
+\hline
+Amostra & ys & P(ys) & ys.P(ys)\\
+\hline
+2,4 & 3 & 1/15 & 0.2\\
+\hline
+2,5 & 3.5 & 1/15 & 0.23\\
+\hline
+2,7 & 4.5 & 1/15 & 0.3\\
+\hline
+2,8 & 5 & 1/15 & 0.33\\
+\hline
+2,9 & 5.5 & 1/15 & 0.37\\
+\hline
+4,5 & 4.5 & 1/15 & 0.3\\
+\hline
+4,7 & 5.5 & 1/15 & 0.37\\
+\hline
+4,8 & 6 & 1/15 & 0.4\\
+\hline
+4,9 & 6.5 & 1/15 & 0.43\\
+\hline
+5,7 & 6 & 1/15 & 0.4\\
+\hline
+5,8 & 6.5 & 1/15 & 0.43\\
+\hline
+5,9 & 7 & 1/15 & 0.47\\
+\hline
+7,8 & 7.5 & 1/15 & 0.5\\
+\hline
+7,9 & 8 & 1/15 & 0.53\\
+\hline
+8,9 & 8.5 & 1/15 & 0.57\\
+\hline
+\end{tabular}
+\end{table}
+\efloatseparator
+ 

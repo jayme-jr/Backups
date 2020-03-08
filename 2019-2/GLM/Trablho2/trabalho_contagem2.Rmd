@@ -1,0 +1,483 @@
+---
+output:
+  html_document:
+    fig_caption: yes
+    highlight: kate
+    number_sections: yes
+subtitle: Relatório da Análise de Dose Resposta Para Base Binária e Contínua 
+header-includes: \usepackage[brazil]{babel}
+                 \usepackage{amsmath}
+                 \usepackage{float}
+                 \usepackage{bm}
+                 \usepackage{graphicx} 
+                 \usepackage{amsmath} 
+                 \floatplacement{figure}{H}
+---
+
+```{r setup, include=FALSE}
+library(tufte)
+# invalidate cache when the tufte version changes
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tufte'), fig.pos= "h")
+options(knitr.kable.NA = '')
+```
+
+```{r, echo=FALSE, include=FALSE, results='hide', message=FALSE, warning=FALSE}
+library(tidyverse)
+library(kableExtra)
+library(readxl)
+library(gridExtra)
+library(corrplot)
+library(MASS)
+library(hnp)
+library(car)
+library(statmod)
+library(effects)
+
+## Bases
+munic <- read.csv2("municipios.csv", sep = ";", header = TRUE) %>% 
+  mutate(`Município` = str_sub(`Município`, start = 8)) 
+
+munic <- munic[-c(74, dim(munic)[1]),]
+
+
+munic <- munic %>% dplyr::select(`Município`)
+
+MR1 <- read.csv2("base_MR1.csv", sep = ";", header = TRUE) %>% 
+  mutate(`Município` = str_sub(`Município`, start = 8),
+         `Macrorregião` = 1) 
+
+MR2 <- read.csv2("base_MR2.csv", sep = ";", header = TRUE) %>% 
+  mutate(`Município` = str_sub(`Município`, start = 8),
+         `Macrorregião` = 2)
+
+MR3 <- read.csv2("base_MR3.csv", sep = ";", header = TRUE) %>% 
+  mutate(`Município` = str_sub(`Município`, start = 8),
+         `Macrorregião` = 3)
+
+MR3$`Óbitos.p.Ocorrênc`[22] <- MR3$`Óbitos.p.Ocorrênc`[22] + MR3$`Óbitos.p.Ocorrênc`[13]
+MR3 <- MR3[-13,]
+
+MR4 <- read.csv2("base_MR4.csv", sep = ";", header = TRUE) %>% 
+  mutate(`Município` = str_sub(`Município`, start = 8),
+         `Macrorregião` = 4)
+
+veic <- read_xlsx("base_veic.xlsx", sheet = "TODOS") %>% 
+  dplyr::select(`Município`, n_veiculos)
+    
+
+veic$`Município`[102] <- "Eldorado do Carajás"
+
+
+pop <- read_xlsx("base_pop.xlsx") 
+pop$Espacialidades[47] <- "Eldorado do Carajás"
+pop$Espacialidades[108] <- "Santa Izabel do Pará"
+
+pop <- pop %>% 
+  rename("Município" = Espacialidades, "pop_urb" = `População urbana 2010`, 
+         "pop_total" = `População total 2010`, "per_capta" = `Renda per capita 2010`) %>% 
+  mutate(pop_urb = round(pop_urb/pop_total, digits = 2))
+  
+
+mr1 <- c("Afuá", "Anajás", "Bagre", "Chaves", "Curralinho", "Gurupá", "Melgaço", "Santa Cruz do Arari", "Porto de Moz")
+mr2 <- c("Colares", "Quatipuru", "Maracanã")
+mr3 <- c("Faro")
+mr4 <- c("Bannach", "Brejo Grande do Araguaia", "Palestina do Pará")
+
+MR <- MR1 %>% 
+  bind_rows(MR2) %>% 
+  bind_rows(MR3) %>% 
+  bind_rows(MR4)
+
+base <- munic %>% 
+  left_join(MR) %>% 
+  left_join(veic) %>% 
+  left_join(pop) %>% 
+  rename("Fatalidades" = `Óbitos.p.Ocorrênc`) %>% 
+  mutate(Fatalidades = ifelse(is.na(Fatalidades), 0, Fatalidades),
+         `Macrorregião` = ifelse(`Município` %in% mr1, 1, 
+                                ifelse(`Município` %in% mr2, 2,
+                                       ifelse(`Município` %in% mr3, 3, 
+                                              ifelse(`Município` %in% mr4, 4, `Macrorregião`)))))#,
+         # `Macrorregião` = factor(`Macrorregião`, levels = c(1, 2, 3, 4))) 
+
+## Descritiva
+summary(base)
+
+tabela1 <- head(base, n = 10)
+T_1 <- kableExtra::kable(tabela1, align = 'lcccccc', booktabs = TRUE) %>% 
+  kableExtra::kable_styling(latex_options = c("striped", "hold_position"))
+## Box-Plots
+par(mfrow=c(2,3))
+
+for (i in 2:ncol(base)) {
+  boxplot(base[,i], 
+          xlab = '', 
+          ylab = '', 
+          main = names(base[i]), 
+          las=1,
+          col = '#C8F9F3')
+}
+
+g1 <- ggplot(base, aes(x=Fatalidades)) + geom_histogram()+ xlab('Fatalidades')+ ylab('')
+g2 <- ggplot(base, aes(x=`Macrorregião`)) + geom_histogram()+ xlab('Macrorregião')+ ylab('')
+g3 <- ggplot(base, aes(x=n_veiculos)) + geom_histogram()+ xlab('Frota de Veículos')+ ylab('')
+g4 <- ggplot(base, aes(x=pop_total)) + geom_histogram()+ xlab('Popupalação')+ ylab('')
+g5 <- ggplot(base, aes(x=pop_urb)) + geom_histogram()+ xlab('Taxa de População Urbana')+ ylab('')
+g6 <- ggplot(base, aes(x=per_capta)) + geom_histogram()+ xlab('Renda Per Capta')+ ylab('')
+
+grid.arrange(g1, g2, g3, g4, g5, g6, nrow=2, ncol=3)
+## Pelos histogramas ficou evidente que as variáveis frota de carros, população e renda per capta são assimétricas.
+## Então pode ser considerada uma transformação para estas variáveis.
+## A variável resposta(Fatalidades) também se mostrou assimétrica devido a alguns municípios terem muito mais casos
+## que outros.
+
+### Transformando variáveis explicativas
+base$log_n_veiculos <- log(base$n_veiculos)
+base$log_pop_total  <- log(base$pop_total)
+base$log_per_capta <- log(base$per_capta)
+
+## E verificar novamente a forma da distribuição das variáveis transformadas:
+  
+par(mfrow = c(1,3))
+
+hist(base$log_n_veiculos, main = 'log(Frota)', xlab = '', ylab = '', col = '#F3EBAB')
+hist(base$log_pop_total, main = 'log(População)', xlab = '', ylab = '', col = '#F3EBAB')
+hist(base$log_per_capta, main = 'log(Renda Per Capta)', xlab = '', ylab = '', col = '#F3EBAB')
+
+
+## Correlação
+par(mfrow = c(1,1))
+cor <- cor(base[ , c(2,3,6,8,9,10)], use = "na.or.complete")
+
+corrplot.mixed(cor, upper = "ellipse")
+## Nenhuma das variáveis mostrou forte correlação com a resposta ou entre si.
+
+### Gráfico de disperssão
+
+plot(base[ , c(2,3,6,8,9,10)] , 
+     pch=20 , 
+     cex=1.5 , 
+     col=rgb(0.5, 0.8, 0.9, 0.7))
+
+## Gráfico de correlação mostra que a variável resposta tem valores altos atípicos, distante das nuvens de pontos.
+
+### Modelos Poisso e Binomial Negativa com ligação logarítmica.
+
+m1 <- glm(Fatalidades ~ `Macrorregião` + log_n_veiculos + log_pop_total + pop_urb + log_per_capta, 
+          data = base, family = 'poisson')
+
+m2 <- glm.nb(Fatalidades ~ `Macrorregião` + log_n_veiculos + log_pop_total + pop_urb + log_per_capta, 
+             data = base)
+### Escolha do Modelo
+
+ajuste = c('Poisson', 'Binomial Negativa')
+
+aic    = c(AIC(m1), AIC(m2))
+
+verossimilhança = c(logLik(m1),logLik(m2))
+
+df <- data.frame(ajuste, aic, verossimilhança)
+
+T_2 <- kableExtra::kable(df, align = 'lcc', booktabs = TRUE) %>% 
+  kableExtra::kable_styling(latex_options = c("striped", "hold_position"))
+
+## Modelo selecionado foi o com menor AIC e maior Verossimilhança, Binomial Negativa.
+
+
+## Gráficos de envelopes simulados
+par(mfrow = c(1,2))
+
+hnp(m1, xlab = 'Percentil da N(0,1)', 
+    ylab = 'Resíduos', 
+    main = 'Poisson')
+
+hnp(m2, xlab = 'Percentil da N(0,1)', 
+    ylab = 'Resíduos', 
+    main = 'Binomial Negativa')
+
+## Nota-se pelas medidas de qualidade de ajuste e o comportamento dos resíduos no gráfico a total falta de 
+## aderência à distribuição de Poison; alterando a distribuição da resposta para Binomial Negativa obteve-se 
+## um ajuste satisfatório.
+
+## Vamos seguir as análises fazendo uso do modelo Binomial Negativo.
+
+### Resumo do modelo
+
+summary(m2)
+
+## Pelo resumo, as variáveis log do número de veículos e taxa de população urbana  foram
+## significativas. E o paâmetro de distpessão 5.95, muito maior que 1 explica a falta de ajuste do modelo de Poisson.
+
+### Reajuste do modelo com seleção de variáveis pelo método stepwise.
+
+m2.1 <- step(m2, direction = "both")
+
+## Resumo do novo modelo
+
+
+coefic <- data.frame(summary(m2.1)$coefficients)
+
+linha <- rownames(coefic)
+
+coefic <- coefic %>% 
+  rename(Estimativa = Estimate, `Erro Padrão` = Std..Error) %>% 
+  mutate_at(c("Estimativa", "Erro Padrão"), function(x) round(x, digits = 3)) %>% 
+  dplyr::select(-c(z.value, Pr...z..))
+
+rownames(coefic) <- linha
+
+T_3 <- kableExtra::kable(coefic, align = 'cc', booktabs = TRUE) %>% 
+  kableExtra::kable_styling(latex_options = c("striped", "hold_position"))
+
+## O algoritmo indica que as variáveis log do número de veículos e taxa de população urbana são significativas e 
+## tem relação positiva com o número de acidentes de trânsito.
+
+## Agora, vamos realizar o teste da razão de verossimilhança do modelo inicial e do reduzido:
+  
+anv <- anova(m2, m2.1)
+a_nova <-tibble(Modelo = c("Binomial Negativa(Restrito)", "Binomial Negativa(Saturado)"),
+           Theta = round(anv$theta, digits = 4), `GL Residual` = anv$`Resid. df`, 
+           `Verossimilhança` = anv$`   2 x log-lik.`, `Estatística de teste` = anv$`Pr(Chi)`) %>% 
+  mutate(`Estatística de teste` = ifelse(is.na(`Estatística de teste`), "", round(`Estatística de teste`, digits = 4)))
+
+T_4 <- kableExtra::kable(a_nova, align = 'lcccc', booktabs = TRUE) %>% 
+  kableExtra::kable_styling(latex_options = c("striped", "hold_position"))
+
+## O p-valor do teste foi relativamente alto, portanto pode-se concluir que o modelo restrito se ajusta aos 
+## dados amostrais tão bem quanto o modelo considerando todas as covariáveis. Portanto o modelo final fica 
+## expresso por:
+
+### Equação do modelo ##
+
+#### Medidas de influência
+
+influenceIndexPlot(m2.1, vars=c("Cook", "Studentized", "hat"), main="Medidas de Influência")
+
+## Com base nesses 3 gráficos, não há indicativos fortes de outliers ou observações influentes.
+
+#### Resíduos quantílicos Aleatorizados
+
+## Outra alternativa para avaliar a qualidade do ajuste é baseada nos resíduos quantílicos aleatorizados. 
+## A função qresiduals do pacote statmod extrai este tipo de resíduos do modelo
+
+par(mfrow=c(1,2))
+
+res <- qresiduals(m2.1)
+
+plot(res)
+
+residuos <- qresiduals(m2.1)
+qqnorm(residuos)
+qqline(residuos, col = 2)
+
+#### Gráficos de efeito
+
+plot(allEffects(m2.1), type = 'response', main = '')
+
+#### Predição
+
+## serão testados 3 perfis de municípios para predição:
+## Perfil 1 - log_n_veiculos = 12.5 e pop_urb = 0.5;
+## Perfil 2 - log_n_veiculos = 7 e pop_urb = 0.1;
+## Perfil 3 - log_n_veiculos = 4 e pop_urb = 0.9;
+
+perfis <- data.frame(log_n_veiculos =  c(12.5, 7, 4), 
+                     pop_urb =  c(0.5,  0.1,  0.9))
+
+## Utilizando a função predict para obter o número esperado de acidentes nos perfis:
+
+
+pred <- floor(predict(m2.1, interval = 'prediction', newdata = perfis, type = 'response'))
+
+perfis$Predi <- pred
+rownames(perfis) <- c("Perfil 1", "Perfil 2", "Perfil 3")
+colnames(perfis) <- c("Número de Veículos (log)", "Taxa de População Urbana", "Predição")
+T_5 <- kableExtra::kable(perfis, align = 'ccc', booktabs = TRUE) %>% 
+  kableExtra::kable_styling(latex_options = c("striped", "hold_position"))
+
+```
+
+\begin{center}
+\textbf{UNIVERSIDADE FEDERAL DO PARANÁ}
+
+\textbf{CURSO DE ESTATÍSTICA}
+
+\vspace{2.2cm}
+
+Andressa Luiza Cordeiro GRR:20160218
+
+Jayme Gomes dos Santos Junior GRR:20160210
+
+Luciana Helena Kowalski GRR:20160231
+
+\vspace{5.5cm}
+
+\textbf{MODELAGEM DE DADOS DE MORTALIDADE POR ACIDENTES DE TRANSPORTE NO PARÁ}
+
+\vspace{9.5cm}
+
+\textbf{CURITIBA}
+
+2019
+\end{center}
+
+# RESUMO
+Com o aumento da violência no trânsito e fatalidades, cresce a necessidade de ações de prevenção de acidentes e cuidados posteriores aos mesmos. Com isso, objetivou-se a fazer uma análise estatística, para determinação de fatores associados às causas de óbitos. Utilizou-se modelagem linear generalizada, com auxílio do software R. Inicialmente foi realizada análise descriva, para então ajuste de modelos e escolha do mais adequado. Com o modelo escolhido foi realizada um reajuste e verificação de predição. O modelo escolhido manteve duas covariáveis que se mostraram significativas, sendo elas relacionadas à frota e urbanização.
+
+# INTRODUÇÃO
+
+A violência no trânsito é um fator bastante preocupante devido ao aumento da população assim como do número de veículos circulantes. As baixas taxas e juros facilitados permitem que mais pessoas tenham acesso à compra de veículos e esses n´úmeros tem como consequência elevados casos de acidentes, muitos deles fatais. Estudos indicam que as maiores taxas de mortalidade estão associadas `a fatores de risco, que podem ser imprudência, falta de educação, insegurança, falta de atendimentos m´edição posterior ao acidente e até mesmo estar relacionada ao gênero do condutor. Identificar as causas de ´óbitos no trânsito permite a execução de ações mitigatórias, tais como planejamentos rodoviários, gestões políticas e outras ações preventivas. 
+
+Sendo assim, o trabalho tem como objetivo realizar a modelagem de dados de acidentes fatais no estado do Pará visando a predição do número de acidentes.
+
+
+# MATERIAL E MÉTODOS
+
+A base de dados principal com a variável resposta utilizada no estudo foi extraída do site **DATASUS** (http://tabnet.datasus.gov.br). As covariáveis população total, população urbana, renda per capta foram extraídas do site Atlas Brasil (http://www.atlasbrasil.org.br/2013/pt/consulta/), já o número de veículos foi extraído do site do IBGE (https://cidades.ibge.gov.br/brasil/pa/pesquisa/22/28120?ano=2017&localidade1=150690). Também foi realizada a subdivisão dos dados em macroregiões, estas foram divididas de acordo com as macroregiões de saúde do estado (4 macroregiões) (Tabela 1). AS variáveis utilizadas na modelagem foram: 
+
+1. **Município -** 143 municípios do estado do Pará; 
+2. **Fatalidades -** Número de acidentes de transporte por municipio (variável resposta);
+3. **Macrorregião -** 4 níveis divididas segundo macrorregiões de saúde do estado;
+4. **n_veiculos -** número de veículos por minicípio; 
+5. **pop_total -** população total por município; 
+6. **pop_urb -** população urbana por município; 
+7. **per_capta -** renda per capta por município.
+
+\vspace{0.5cm}
+\begin{center}Tabela 1: Primeiras linhas da base de dados usada para o ajusta do modelo.\end{center}
+```{r, echo=FALSE}
+T_1
+```
+
+
+A análise estatística foi realizada com o software R.
+
+Para realizar o ajuste do modelo foi utilizado GLM *(Generalized Linear Models)*, foram testados ajustes para a família poisson e binomial negativa ambos com função de ligação logarítmica. A escolha do modelo foi baseada no critério de informação de Akaike (AIC) e na verossimilhança.
+
+
+# RESULTADOS E DISCUSSÕES
+
+
+## Análise descritiva
+
+Para avaliação da distribuição dos dados foi realizado boxplot das variáveis (Figura 1). As variáveis n_veiculos, pop_total e per_capta apresentaram dados com elevada variação e com pontos discrepantes, para melhor verificação foi avaliado em conjunto o histograma.
+
+\begin{figure}
+\centering
+\includegraphics{box_plot.png}
+\caption{Boxplot das variáveis utilizadas na análise.}
+\end{figure}
+
+Pelos histogramas ficou evidente que as variáveis número de carros, população e renda per capta são assimétricas (Figura 2). A variável resposta (Fatalidades) também se mostrou assimétrica devido a alguns municípios terem muito mais casos que outros.
+
+\begin{figure}
+\centering
+\includegraphics{hist1.png}
+\caption{Histograma das variáveis utilizadas na análise.}
+\end{figure}
+
+Sendo assim, foi realizada a transformação logarítmica destas variáveis e foi verificada que esta transformação foi efetiva para correção da assimetria (Figura 3).
+
+\begin{figure}
+\centering
+\includegraphics{hist2.png}
+\caption{Histograma das variáveis com transformação logarístmica.}
+\end{figure}
+
+Foi verificada a correlação entra as variáveis através do gráfico de correlograma (Figura 4). Baseado nestes rersultados foi verificado que não houveram variáveis correlacionadas que poderiam trazer problemas para o ajuste do modelo.
+
+\begin{figure}
+\centering
+\includegraphics{correlacao.png}
+\caption{Correlograma das variáveis.}
+\end{figure}
+
+Foi realizado a matriz de gráficos de dispersão (Figura 5) para confirmar que não houve forte correlação das variáveis com a resposta ou entre si, sendo assim possível confirmar a ausência de corelação entre as mesmas.A variável resposta apresentou pontos discrepantes, longe das nuvens de pontos.
+
+\begin{figure}
+\centering
+\includegraphics{dispersao.png}
+\caption{Matriz de dispersão.}
+\end{figure}
+
+## Ajuste do Modelo de Regressão
+
+Foram testados os modelos da família poissin e Binomial negativa ambos com finção de ligação logarítmica. Na tabela 2 são apresentados os resultados do ajuste para a escolha do modelo.
+
+\vspace{0.5cm}
+\begin{center} Tabela 2 - Ajuste dos MLG avaliados.\end{center}
+```{r, echo=FALSE}
+T_2
+```
+
+Com base nos resultados da tabela acima, foi possível verificar que o modelo Binomial negativo apresentou melhor ajuste uma vez que que AIC foi menor e a verossimilhança foi maior. Para confirmar este resultado foi plotado os gráficos de envelope simulados (Figura 6), sendo confirmado que o modelo Binomial negativo foi o que melhor ajustou os dados uma vez que os mesmos se mantiveram dentro do limite do envelope.
+
+\begin{figure}
+\centering
+\includegraphics{envelopes.png}
+\caption{Gráfico de envelopes simulados dos dois modelos avaliados para ajuste.}
+\end{figure}
+
+Sendo assim, através do método *stepwise* foi realizada a seleção das covariáveis para o modelo ajustado, o mesmo é apresentado na Tabela 3.
+\newpage
+\vspace{0.5cm}
+\begin{center} Tabela 3 - Seleção das covariáveis do modelo.\end{center}
+```{r, echo=FALSE}
+T_3
+```
+
+O algoritmo indica que as variáveis log do número de veículos e taxa de população urbana são significativas. A variável log_n_veículos tem relação positiva com o número de acidentes de trânsito já a variável pop_urb tem relação negativa.
+
+Após foi realizado o teste da razão de verossimilhança a fim de comparar o modelo saturado e do reduzido (Tabela 4), onde foi verificado que os modelos foram similares, sendo assim utilizado o modelo reduzido (menos complexo) no ajuste.
+
+\vspace{0.5cm}
+\begin{center} Tabela 4 - teste da razão de verossimilhança entre modelo reduzido e saturado.\end{center}
+```{r, echo=FALSE}
+T_4
+```
+
+Portanto o modelo final ajustado foi:
+
+\begin{center}
+$$
+y_{i}|\underline{x}{i} \sim Binomial \ Negativa (\mu{i},\phi)
+$$
+
+$$
+log(\mu_i)= -5.383 + 0.881log(n\_veiculos_{i}) - 0,593pop\_urb_{i}
+$$
+\end{center
+
+Foi verificada as medidas de influência, onde foi possível verificar que não há indicativos fortes de outliers ou observações influentes (Figura 7).
+
+\begin{figure}
+\centering
+\includegraphics{influencia.png}
+\caption{Medidas de influência.}
+\end{figure}
+
+Também, foi verificado os resíduos quantílicos aleatorizados, que verifica a qualidade do ajuste. Foi possível verificar que o modelo está satisfatóriamente ajustado com porém com as caudas levemente mais pesadas (Figura 8).
+
+\begin{figure}
+\centering
+\includegraphics{quantilico.png}
+\caption{Gráfico dos resíduos quantílicos aleatorizados.}
+\end{figure}
+
+## Gráfico de Efeitos
+
+O gráfico de efeitos, que fornece uma vizualização das mudanças da variável resposta a partir das variações das variáveis explicativas. Na Figura 9, foi observado que o comportamento de todas está dentro das bandas e do esperado para cada uma. Para o log da frota de veículos foi observado efeito positivo e para a população urbana, efeito negativo. O número de óbitos cresce para municípios com maior quantidade de veículos e menos urbanizadas.
+
+\begin{figure}
+\centering
+\includegraphics{efeito.png}
+\caption{Gráfico de efeitos.}
+\end{figure}
+
+## Predição
+
+Após a conclusão da modelagem e ajuste, foram testados alguns perfis fictícios de municípios a fim de ilustrar quais poderiam ser as respostas para cada um deles. Para o perfil 1 foi selecionado frota com valor alto e população intermediária, para o perfil 2 foi selecionado frota com valor intermediário e população baixa e para o perfil 3 foi selecionado frota com valor baixo e população alta. Os valores e as respostas para cada um dos perfis podem ser observados na Tabela 5. Cada uma das respostas significa o valor predito de óbitos no trânsito para caso houvesse algum município que se enquadrasse em cada perfil.
+
+```{r, echo=FALSE}
+T_5
+```

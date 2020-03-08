@@ -1,0 +1,563 @@
+---
+output:
+  pdf_document:
+    fig_caption: yes
+    highlight: kate
+    number_sections: yes
+subtitle: Relatório da Análise de Dose Resposta Para Base Binária e Contínua 
+header-includes: \usepackage[brazil]{babel}
+                 \usepackage{amsmath}
+                 \usepackage{float}
+                 \usepackage{bm}
+                 \usepackage{graphicx} 
+                 \usepackage{amsmath} 
+                 \floatplacement{figure}{H}
+---
+
+```{r setup, include=FALSE}
+library(tufte)
+# invalidate cache when the tufte version changes
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tufte'), fig.pos= "h")
+options(knitr.kable.NA = '')
+```
+
+```{r, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+library(tidyverse)
+library(drc)
+library(utils)
+library(kableExtra)
+library(combinat)
+library(tinytex)
+library(MASS)
+library(gridExtra)
+library(emmeans)
+library(car)
+library(ROCR)
+library(pROC)
+library(caret)
+library(hnp)
+library(gamlss)
+##### Bank Marketing ######
+### Base para predizer se o cliente vai assinar ou não com o 
+### banco baseado nas informações do cliente.
+#### Variáveis Explicativa ####
+## age: idade do cliente - numérico inteiro;
+## job: emprego do cliente - admin., blue-collar, entrepreneur, housemaid, 
+##                           management, retired, self-employed, services, 
+##                           student, technician, unemployed, unknown;
+## marital: estado civil do cliente - divorced, married, single, unknown;
+## education: nível educacional do cliente - primary, secondary, tertiary, unknown;
+## default: cliente possui crédito - no, yes, unknown;
+## balance: balanço anual médio do cliente em euro - numérico;
+## housing: cliente possui empréstimo habitacional - no, yes, unknown;
+## loan: cliente possui empréstimo pessoal - no, yes, unknown;
+## contact: forma de contato com o cliente - unknown, telephone, cellular;
+## day: dia do mês - inteiro entre 1 e 31;
+## month: mês do ano - jan, feb, mar, apr, may, jun, jul, aug, sep, oct, nov, dec;
+## duration: duração do último contato com o cliente - numérico em segundos;
+## campaing: número de contatos feitos com o cliente - numérico inteiro;
+## pdays: número de dias desde o último contato feito com o cliente em uma campanha
+##        passada - numérico inteiro(-1 significa que não houve contato prévio);
+### Variável Resposta ###
+## y: classificação do preditor - yes, no.
+
+data <- read.csv2("bank_marketing_dataset.csv", sep = ",", dec = ".") %>% 
+  mutate(month = factor(month, levels = c("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug",
+                                          "sep", "oct", "nov", "dec")))
+no <- which(names(data) == "previous" | names(data) == "poutcome")
+b_mark <- data[,-no]
+
+### Vamos separar, aleatoriamente, a base em duas: uma para o ajuste do 
+### modelo (com 80% das observações) e outra para validação (com 20% observações).
+mod_obs <- ceiling(dim(b_mark)[1]*0.8)
+
+set.seed(1234)
+indices <- sample(1:dim(b_mark)[1], size = mod_obs) 
+### indices é um vetor com números de 1 a 4521 numa sequência aleatória.
+
+bmarkajuste <- b_mark[indices,]
+### dataframe com as 3617 linhas para ajuste.
+
+bmarkvalid <- b_mark[-indices,]
+### dataframe com 904 linhas, apenas para validação.
+
+##### Ajustes Iniciais ######
+
+ajuste_null <- glm(y ~ 1, data = bmarkajuste, family = 'binomial')
+ajuste_null_prob <- glm(y ~ 1, data = bmarkajuste, family = 'binomial'(link = probit))
+ajuste_null_clog <- glm(y ~ 1, data = bmarkajuste, family = 'binomial'(link = cloglog))
+ajuste_null_cauc <- glm(y ~ 1, data = bmarkajuste, family = 'binomial'(link = cauchit))
+
+ajuste1 <- glm(y ~ .,family=binomial,data = bmarkajuste)
+ajuste1_prob <- glm(y ~ .,family=binomial(link = probit),data = bmarkajuste)
+ajuste1_clog <- glm(y ~ .,family=binomial(link = cloglog),data = bmarkajuste)
+ajuste1_cauc <- glm(y ~ .,family=binomial(link = cauchit),data = bmarkajuste)
+
+ajuste4 <- step(ajuste_null, scope = formula(ajuste1), direction = "both")
+ajuste_probito <- step(ajuste_null_prob, scope = formula(ajuste1_prob), direction = 'both') 
+ajuste_cloglog <- step(ajuste_null_clog, scope = formula(ajuste1_clog), direction = 'both')
+ajuste_cauchit <- step(ajuste_null_cauc, scope = formula(ajuste1_cauc), direction = 'both')
+
+####### Tablelas Ajustes Iniciais ############
+
+AIC_ <- data.frame(AIC(ajuste4,ajuste_probito,ajuste_cloglog,ajuste_cauchit)) %>% 
+  mutate(Lig = c("Logito", "Probito", "Clog-log", "Cauchit"),
+         `N° de Parâmetros` = c(length(ajuste4$coefficients), length(ajuste_probito$coefficients),
+                                length(ajuste_cloglog$coefficients), length(ajuste_cauchit$coefficients))) %>% 
+  arrange(AIC) %>% 
+  dplyr::select(`Função de Ligação` = Lig, AIC, `N° de Parâmetros`)
+
+
+T_1 <- kableExtra::kable(AIC_, align = 'ccc', booktabs = TRUE) %>% 
+  kableExtra::kable_styling(latex_options = c("striped", "hold_position"))
+
+###### Agrupamento de Níveis Usando GAMLLS #####
+# Variável month
+m11 <- gamlss(y~pcat(month, method="GAIC", k=2), family = BI(mu.link = "probit"), data=bmarkajuste) # GAIC
+mn <- gamlss(y~1, family = BI(mu.link = "probit"), data=bmarkajuste) # null model 
+ms <- gamlss(y~month-1, family = BI(mu.link = "probit"), data=bmarkajuste) # saturated model 
+m1 <- gamlss(y~pcat(month), family = BI(mu.link = "probit"), data=bmarkajuste)
+AIC(mn, ms, m1, m11)
+
+groups_m <- unique(getSmo(m11)$coef)
+coefs_m <- round(getSmo(m11)$coef, digits = 2)
+month_lambda <- round(getSmo(m11)$lambda, digits = 3)
+month_tbl <- data.frame(Niveis = levels(bmarkajuste$month), Coeficientes = coefs_m) %>% arrange(Coeficientes)
+
+# variável job
+m11j <- gamlss(y~pcat(job, method="GAIC", k=2), family = BI(mu.link = "probit"), data=bmarkajuste)
+mnj <- gamlss(y~1, family = BI(mu.link = "probit"), data=bmarkajuste) # null model 
+msj <- gamlss(y~job-1, family = BI(mu.link = "probit"), data=bmarkajuste) # saturated model 
+m1j <- gamlss(y~pcat(job), family = BI(mu.link = "probit"), data=bmarkajuste)
+AIC(mnj, msj, m1j, m11j)
+
+coefs_j <- round(getSmo(m11j)$coef, digits = 2)
+job_lambda <- round(getSmo(m11j)$lambda, digits = 3)
+job_tbl <- data.frame(Niveis = levels(bmarkajuste$job), Coeficientes = coefs_j) %>% arrange(Coeficientes)
+
+## Tabela Agrupamento month
+
+Tab2 <- kableExtra::kable(month_tbl, align = 'cc', booktabs = TRUE) %>% 
+  kableExtra::kable_styling(latex_options = c("striped", "hold_position"))
+
+## Tabela Agrupamento job
+
+Tab3 <- kableExtra::kable(job_tbl, align = 'cc', booktabs = TRUE) %>% 
+  kableExtra::kable_styling(latex_options = c("striped", "hold_position"))
+
+### Reorganizando as variáveis month e job ####
+m_g1 <- "may"
+m_g2 <- c("jan", "jun", "jul", "nov") 
+m_g3 <- "aug"
+m_g4 <- c("feb", "apr")
+m_g5 <- c("mar", "sep", "dec")
+
+j_g1 <- "blue-collar"
+j_g2 <- c("entrepreneur", "sevices", "tehnician")
+j_g3 <- c("admin", "housemaid", "management", "self-employed", "unemployed", "unknow")
+j_g4 <- "retired"
+j_g5 <- "student"
+
+bmarkajuste2 <- bmarkajuste %>% 
+  mutate(month = ifelse(month %in% m_g2, "month2",
+                        ifelse(month %in% m_g4, "month4",
+                               ifelse(month %in% m_g5, "month5",
+                                      ifelse(month == "may", "month1", "month3")))),
+         month = factor(month, levels = c("month1", "month2", "month3", "month4", "month5")),
+         job = ifelse(job %in% j_g2, "job2",
+                      ifelse(job %in% j_g3, "job3",
+                             ifelse(job == "blue-collar", "job1",
+                                    ifelse(job == "retired", "job4", "job5")))),
+         job = factor(job, levels = c("job1", "job2", "job3", "job4", "job5")))
+
+bmarkvalid2 <- bmarkvalid %>% 
+  mutate(month = ifelse(month %in% m_g2, "month2",
+                        ifelse(month %in% m_g4, "month4",
+                               ifelse(month %in% m_g5, "month5",
+                                      ifelse(month == "may", "month1", "month3")))),
+         month = factor(month, levels = c("month1", "month2", "month3", "month4", "month5")),
+         job = ifelse(job %in% j_g2, "job2",
+                      ifelse(job %in% j_g3, "job3",
+                             ifelse(job == "blue-collar", "job1",
+                                    ifelse(job == "retired", "job4", "job5")))),
+         job = factor(job, levels = c("job1", "job2", "job3", "job4", "job5")))
+
+##### Ajustes Novos ######
+
+ajuste_null_n <- glm(y ~ 1, data = bmarkajuste2, family = 'binomial')
+ajuste_null_prob_n <- glm(y ~ 1, data = bmarkajuste2, family = 'binomial'(link = probit))
+ajuste_null_clog_n <- glm(y ~ 1, data = bmarkajuste2, family = 'binomial'(link = cloglog))
+ajuste_null_cauc_n <- glm(y ~ 1, data = bmarkajuste2, family = 'binomial'(link = cauchit))
+
+ajuste1_n <- glm(y ~ .,family=binomial,data = bmarkajuste2)
+ajuste1_prob_n <- glm(y ~ .,family=binomial(link = probit),data = bmarkajuste2)
+ajuste1_clog_n <- glm(y ~ .,family=binomial(link = cloglog),data = bmarkajuste2)
+ajuste1_cauc_n <- glm(y ~ .,family=binomial(link = cauchit),data = bmarkajuste2)
+
+ajuste_logito_n <- step(ajuste_null_n, scope = formula(ajuste1_n), direction = "both")
+ajuste_probito_n <- step(ajuste_null_prob_n, scope = formula(ajuste1_prob_n), direction = 'both') 
+ajuste_cloglog_n <- step(ajuste_null_clog_n, scope = formula(ajuste1_clog_n), direction = 'both')
+ajuste_cauchit_n <- step(ajuste_null_cauc_n, scope = formula(ajuste1_cauc_n), direction = 'both')
+
+####### Tablelas Ajustes Iniciais ############
+
+AIC_ <- data.frame(AIC(ajuste_probito, ajuste_logito_n, ajuste_probito_n, ajuste_cloglog_n, ajuste_cauchit_n)) %>% 
+  mutate(Lig = c("Probito *", "Logito", "Probito", "Complemento log-log", "Cauchit"),
+         `N° de Parâmetros` = c(length(ajuste_probito$coefficients),length(ajuste_logito_n$coefficients),
+                                length(ajuste_probito_n$coefficients), length(ajuste_cloglog_n$coefficients), 
+                                length(ajuste_cauchit_n$coefficients))) %>% 
+  arrange(AIC) %>%
+  dplyr::select(`Função de Ligação` = Lig, AIC, `N° de Parâmetros`)
+
+
+T_4 <- kableExtra::kable(AIC_, align = 'ccc', booktabs = TRUE) %>% 
+  kableExtra::kable_styling(latex_options = c("striped", "hold_position"))
+
+### Parâmetros do modelo e seus coeficientes
+
+coefic <- data.frame(summary(ajuste_probito_n)$coefficients)
+
+linha <- rownames(coefic)
+
+coefic <- coefic %>% 
+  rename(Estimativa = Estimate, `Erro Padrão` = Std..Error) %>% 
+  mutate_at(c("Estimativa", "Erro Padrão"), function(x) round(x, digits = 3)) %>% 
+  dplyr::select(-c(z.value, Pr...z..))
+  
+rownames(coefic) <- linha
+
+T_5 <- kableExtra::kable(coefic, align = 'cc', booktabs = TRUE) %>% 
+  kableExtra::kable_styling(latex_options = c("striped", "hold_position"))
+
+##### Gráficos de efeito #####
+
+# plot(predictorEffects(ajuste_probito_n, ~ duration + month + job + pdays))
+# plot(predictorEffects(ajuste_probito_n, ~ housing + campaign + loan + age))
+
+##### Sensibilidade e Especificidade ######
+
+paj <- predict(ajuste_probito_n, type = 'response', newdata = bmarkajuste2)
+### Probabilidades estimadas para os indivíduos da base de ajuste;
+
+pval <-predict(ajuste_probito_n, type = 'response', newdata = bmarkvalid2) 
+### Probabilidades estimadas para os indivíduos da base de validação.
+
+### Vamos cruzar realidade e predição para diferentes pontos de corte.
+
+classp0.5 <- factor(ifelse(pval >= 0.5, 'no', 'yes'))
+# classp0.5 ### Classificações usando o ponto de corte 0,5.
+# data.frame(pval, classp0.5) ### Probabilidades estimadas e classificações.
+
+### Classificando como "no" indivíduos com p > 0,5.
+tabela.5 <- table(classp0.5, bmarkvalid2$y) 
+
+T_6 <- kableExtra::kable(tabela.5, align = 'cc', booktabs = TRUE) %>% 
+  kableExtra::kable_styling(latex_options = c("striped", "hold_position"))
+
+### Vamos estimar a sensibilidade e a especificidade referentes a esta regra de decisão.
+sensp0.5 <- sum(classp0.5 == 'no' & bmarkvalid2$y == 'no')/sum(bmarkvalid2$y == 'no')
+sensp0.5
+espec0.5 <- sum(classp0.5 == 'yes' & bmarkvalid2$y == 'yes')/sum(bmarkvalid2$y == 'yes')
+espec0.5
+
+## Baseado nos dados de ajuste, chegamos a conclusão de usar uma probabilidade > 0.89
+
+classp0.89 <- factor(ifelse(pval >= 0.89, 'no', 'yes'))
+# classp0.89 ### Classificações usando o ponto de corte 0,89.
+# data.frame(pval, classp0.89) ### Probabilidades estimadas e classificações.
+
+### Classificando como "No" indivíduos com p > 0,89.
+ tabela.89 <- table(classp0.89, bmarkvalid2$y) 
+
+ T_7 <- kableExtra::kable(tabela.89, align = 'cc', booktabs = TRUE) %>% 
+   kableExtra::kable_styling(latex_options = c("striped", "hold_position"))
+
+### Vamos estimar a sensibilidade e a especificidade referentes a esta regra de decisão.
+sensp0.89 <- sum(classp0.89 == 'no' & bmarkvalid2$y == 'no')/sum(bmarkvalid2$y == 'no')
+sensp0.89
+espec0.89 <- sum(classp0.89 == 'yes' & bmarkvalid2$y == 'yes')/sum(bmarkvalid2$y == 'yes')
+espec0.89
+
+## Um terceiro ponto de corte com probabilidade > 0.3
+
+classp0.3 <- factor(ifelse(pval >= 0.3, 'no', 'yes'))
+# classp0.89 ### Classificações usando o ponto de corte 0,89.
+# data.frame(pval, classp0.3) ### Probbilidades estimadas e classificações.
+
+### Classificando como "No" indivíduos com p > 0,89.
+tabela.3 <- table(classp0.3, bmarkvalid2$y)
+
+T_8 <- kableExtra::kable(tabela.3, align = 'cc', booktabs = TRUE) %>% 
+  kableExtra::kable_styling(latex_options = c("striped", "hold_position"))
+
+### Vamos estimar a sensibilidade e a especificidade referentes a esta regra de decisão.
+sensp0.3 <- sum(classp0.3 == 'no' & bmarkvalid2$y == 'no')/sum(bmarkvalid2$y == 'no')
+sensp0.3
+espec0.3 <- sum(classp0.3 == 'yes' & bmarkvalid2$y == 'yes')/sum(bmarkvalid2$y == 'yes')
+espec0.3
+
+## Quadro para comparação das probabilidades para sensibilidade e especificidade
+
+datacomp <- data.frame(c(sensp0.89,sensp0.5, sensp0.3),
+                       c(espec0.89,espec0.5, espec0.3))
+names(datacomp)<-c('Sensibilidade','Especificidade')
+rownames(datacomp)<-c('pc=0,89','pc=0,5', 'pc=0,3')
+datacomp
+
+T_9 <- kableExtra::kable(datacomp, align = 'ccc', booktabs = TRUE) %>% 
+  kableExtra::kable_styling(latex_options = c("striped", "hold_position"))
+
+### Vamos usar o pacote ROCR para calcular algumas medidas de qualidade preditiva.### 
+
+pred <- prediction(pval, bmarkvalid2$y)
+perf <- performance(pred, measure = "tpr" , x.measure = "fpr") 
+
+# usando a base de ajuste
+predaj <- prediction(paj, bmarkajuste2$y)
+perfaj <- performance(predaj, measure = "tpr" , x.measure = "fpr")
+# tpr: True Positive Rate; fpr: False Positive Rate.
+
+# plot(perf, colorize=TRUE,  print.cutoffs.at=seq(0.05,0.95,0.05), lwd = 2, main="Curva ROC",ylab="Sensibilidade",xlab="Especificidade")
+# abline(0,1, lty = 2)
+# plot(perfaj, col = 'red', lwd = 2, add = T)
+
+# Vamos supor que o custo de classificar um falço não seja 1.5 vezes o de classificar um falso sim 
+# (C(S|N) = 1.5 * C(N|S)). Assim, para uma regra de classificação com probabilidades de classificação incorretas P(S|N) e P(N|S), o custo esperado de má classificação (ECMC) fica dado por:
+#   
+#   ECMC = C(S|N) \* P(S|N) \* P(N) + C(N|S) \* P(N|S) \* P(S)
+# 
+# Como existe 11% de respostas sim na base, P(S) = 0,11; P(N) = 0,89.
+# 
+# Assim, ECMC = 0.89 \* P(S|N) + 0,165 \* P(N|S)
+
+perf3 <- performance(pred, measure = 'fpr', x.measure = 'fnr')
+PMB <- perf3@y.values[[1]] ### P(M|B) para os diferentes pontos de corte (pc)
+PBM <- perf3@x.values[[1]] ### P(B|M) para os diferentes pontos de corte.
+pc <- perf3@alpha.values[[1]] ### pontos de corte.
+
+ECMC <- 0.89*PMB + 0.165*PBM ### Custos esperados de má-classificação.
+
+#plot(pc, ECMC, main="Custo de Classificação",ylab="ECMC",xlab="Pontos de Corte")
+
+## Ponto de corte em torno de 0.4 gera o menor custo.
+```
+
+\begin{center}
+\textbf{UNIVERSIDADE FEDERAL DO PARANÁ}
+
+\textbf{CURSO DE ESTATÍSTICA}
+
+\vspace{2.2cm}
+
+Andressa Luiza Cordeiro GRR:20160218
+
+Jayme Gomes dos Santos Junior GRR:20160210
+
+Luciana Helena Kowalski GRR:20160231
+
+\vspace{5.5cm}
+
+\textbf{MODELAGEM DE BANK MARKETING POR REGRESSÃO LOGÍSTICA}
+
+\vspace{9.5cm}
+
+\textbf{CURITIBA}
+
+2019
+\end{center}
+
+# Resumo
+
+O objetivo do trabalho foi realizar a modelagem de dados sobre marketing bancário vizando predizer a contratação do serviço pelo potencial cliente. Os dados foram extraídos do do site _mldata_ (Bank Marketing). Para o ajuste do modelo, foi utilizado modelos lineares generalizados (GLM) da família binomial com resposta binária. Primeiramente foi ajustado o modelo com 80% das observações, após o mesmo foi validado com os 20% restantes. A seleção das covariáveis foi realizada através do _stepwise_ com o critério de informação de Akaike (AIC). Devido oa elevado número de níveis em variáveis categóricas dos dados, foi utilizado o pacote _GAMLSS_ visando agrupar níveis semelhantes. Para o cálculo da predição do modelo foi testado os pontos de corte de 0,3, 0,5 e 0,89. Posteriormente, foi calculada a sensibilidade e especificidade e a relação entre eles foi representada pela curva ROC. Foi realizada a regra de decisão para o modelo incorporando custos. O reagrupamente dos níveis de ambas as variáveis _month_ e _job_ gerou 5 níveis. O modelo gerado apresentou elevada especificidade e baixa sensibilidade. O ponto de corte da regra de decisão que gerou menor custo foi de 0,4.
+
+
+# Introdução
+
+O marketing do setor bancário está em contante mudança, isso ocorre devido a facilidade de informação que acarreta em maior exigência por parte dos clientes. Com isso, os bancos constantemente estão alterando suas políticas de marketing e venda. No entanto, apesar da suma importância para conseguir novas fidelizações de clientes, é elevado o custo deste recurso. Além disso, nas últimas décadas aumentou significativamente a concorrência no setor bancário, o que maximiza a importância do marketing neste setor.
+
+Neste contexto, o objetivo do trabalho foi realizar a modelagem de um programa de marketing telefônico bancário vizando predizer a adesão ou não de novos clientes a novos contratos.
+
+# Material e Métodos
+
+A base de dados _Bank Marketing_ utilizada no estudo foi extraída do site _"https://www.mldata.io/datasets/."_. Com as seguintes variáveis: __age__ - idade do cliente(numérico inteiro); __job__ - emprego do cliente = admin., blue-collar, entrepreneur, housemaid, management, retired, self-employed, services, student, technician, unemployed, unknown(fator);
+__marital__ - estado civil do cliente = divorced, married, single, unknown(fator); __education__ - nível educacional do cliente = primary, secondary, tertiary, unknown(fator); __default__ - cliente possui crédito = no, yes, unknown(fator);
+__balance__- balanço anual médio do cliente em euro(numérico); __housing__ - cliente possui empréstimo habitacional = no, yes, unknown(fator); __loan__ - cliente possui empréstimo pessoal = no, yes, unknown(fator); __contact__ - forma de contato com o cliente = unknown, telephone, cellular(fator); __day__ - dia do mês(inteiro entre 1 e 31); __month__ - mês do ano = jan, feb, mar, apr, may, jun, jul, aug, sep, oct, nov, dec(fator); __duration__ - duração do último contato com o cliente(numérico em segundos); __campaing__ - número de contatos feitos com o cliente(numérico inteiro); __pdays__ - número de dias desde o último contato feito com o cliente em uma campanha passada(numérico inteiro onde -1 significa que não houve contato prévio); __y__ - variável resposta = yes, no(fator).
+
+As análises estatísticas foram realizadas através do software `R`.
+
+Para realizar o ajuste do modelo foi utilizado GLM( _Generalized Linear Models_ ) da família binomial para resposta binária com as funções de ligação _logito_, _probito_, _complemento log-log_ ( _clog-log_ ) e _cauchit_.
+
+A base de dados foi separada em duas, sendo uma para ajustar o modelo(com 80% das observações) e a outra para validação do ajuste(com os 20% restantes). Este procedimento foi realizado de forma aleatória.
+
+Inicialmente, foram selecionada as covariáveis descritas anteriormente. Foram utilizados os método _forwar_, _backward_ e _stepwise_ para seleção de covariáveis, selecionando o modelo através do critério de informação de Akaike (AIC), utilizando o que produziu o menor valor (AIC). 
+
+Então foi utilizado um algorítmo de redução de níveis para ajustar as variáveis categóricas com muitos níveis. Assim ajustando novos modelos com as variáveis reajustadas para realizar uma nova seleção de modelo.
+
+Posteriormente foi avaliada a predição do modelo através de pontos de corte, estabelidos como 0,5(de maneira intuitiva) e 0,89(baseado na proporção da variável resposta). Então, foram comparadas a sensibilidade e especificidade nos dois pontos de corte. Após, foi utilizada a curva _ROC_ para representar a relação entre sensibilidade e especificidade para então usar regras de decisão baseadas em custo de classificação.
+
+# Resultado e Discussões
+
+Após realizada a seleção das covariáveis, foi escolhido o modelo ajustado pelo algorítmo _stepwise_ com o menor AIC.
+
+\vspace{0.5cm}
+\begin{center}Tabela 1: Modelos Binomiais, Suas Funções de Ligação e Valores AIC.\end{center}
+```{r, echo=FALSE}
+T_1
+```
+
+Muito embora o modelo __Binomial(probito)__ tenha sido selecionado pelo menor AIC, todos os modelos candidatos se mostraram muito complicados(número grande de parãmetros) devido a covariáveis do tipo fator com muitos níveis(Tabela 1).
+
+Para tentar lidar com este problema, será usado um método do pacote _GAMLSS_ de combinar níveis parecidos e assim gerar novos níveis para variáveis do tipo fator baseado nas idéias de _Tutz(2013)_ que, diferente de outros métodos que encolhem a diferença entre as estimativas dos níveis do fator em torno da média geral, ele classifica níveis em blocos de estimativas parecidas através de um valor $\boldsymbol{\lambda}$ reduzindo a quantidade de níveis.
+
+## Reagrupamento de Níveis
+
+\begin{figure}
+\centering
+\includegraphics{plotLambda_month.png}
+\caption{Gráfico de Reagrupamento de Níveis da variável $\textit{month}$}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics{plotLambda_job.png}
+\caption{Gráfico de Reagrupamento de Níveis da variável $\textit{job}$}
+\end{figure}
+
+É possível verificar que conforme o $\boldsymbol{\lambda}$ existe uma semelhança entre os níveis das variáveis _month_(Figura 1) e _job_(Figura 2).
+
+O algorítmo de agrupamento retorna um coeficiente para cada nível da variável e coeficientes iguais indicam os niveis em cada novo agrupamento.
+
+\newpage
+
+\begin{center}Tabela 2: Coeficientes Para Reagrupamentos dos Níveis da Variável $\textit{month}$.\end{center}
+```{r echo=FALSE}
+Tab2
+```
+
+A variável _month_ ficou agrupada em 5 novos níveis com $\boldsymbol{\lambda}$ = 0.165(Tabela 2):
+
+1. _may_;
+
+2. _jan_, _jun_, _jul_ e _nov_;
+
+3. _aug_;
+
+4. _feb_ e _apr_;
+
+5. _mar_, _sep_ e _dec_.
+
+\newpage
+
+\begin{center}Tabela 3: Coeficientes Para Reagrupamentos dos Níveis da Variável $\textit{job}$.\end{center}
+```{r echo=FALSE}
+Tab3
+```
+
+E para a variável _job_, o novo agrupamento ficou dividido em 5 novos níveis com $\boldsymbol{\lambda}$ = 0.086(Tabela 3).
+
+1. _blue-collar_;
+
+2. _entrepreneur_, _sevices_ e _tehnician_;
+
+3. _admin_, _housemaid_, _management_, _self-employed_, _unemployed_ e _unknow_;
+
+4. _retired_;
+
+5. _student_.
+
+## Ajuste de Modelos com Níveis Reagrupados 
+
+\begin{center}Tabela 4: Comparação Entre o Modelo Selecionado(*) e os com Níveis Reagrupados.\end{center}
+```{r, echo=FALSE}
+T_4
+```
+
+Ao analisar os modelos com níveis reagrupados em relação ao selecionado anteriormente(Tabela 4), é notório que o menor (AIC) ainda é o do primeiro modelo escolhido, mas em virtude da redução em 17 parâmetros o modelo selecionado para continuar a análise foi o __Binomial__ com funçãp de ligação __probito__ e AIC = 1863.186, pois um acréscimo em 41.768 em AIC é razoável por uma simplicidade maior no modelo.
+
+\newpage
+
+\begin{center}Tabela 5: Coeficientes do Modelo Ajustado e Seus Erros Padrões.\end{center}
+```{r, echo=FALSE}
+T_5
+```
+
+Modelo ajustado(Tabela 5) e sua equação.
+
+$\boldsymbol{\Phi}^{-1}(\pi_{i}) = \hat{\beta}_0 + \hat{\beta}_1x_{1} + \hat{\beta}_2x_{2} + \hat{\beta}_3x_{3} + \hat{\beta}_4x_{4} + \hat{\beta}_5x_{5} + \hat{\beta}_6x_{6} + \hat{\beta}_7x_{7} + \hat{\beta}_8x_{8} +$ 
+$\hat{\beta}_9x_{9} + \hat{\beta}_{10}x_{10} + \hat{\beta}_{11}x_{11} + \hspace{3cm} \hat{\beta}_{12}x_{12} + \hat{\beta}_{13}x_{13} + \hat{\beta}_{14}x_{14} + \hat{\beta}_{15}x_{15} + \hat{\beta}_{16}x_{16} + \hat{\beta}_{17}x_{17}$ 
+
+## Gráficos de Efeito do Preditor
+
+Como o modelo selecionado temo função de ligação __probito__, uma forma de interpretar os parâmetros é através de gráficos de efeito(Figura 3 e Figura 4).
+
+\begin{figure}
+\centering
+\includegraphics{effect1.png}
+\caption{Gráficos de Efeito para $\textit{duration}$, $\textit{month}$, $\textit{job}$ e $\textit{pdays}$}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics{effect2.png}
+\caption{Gráficos de Efeito para $\textit{housing}$, $\textit{campaign}$, $\textit{loan}$ e $\textit{age}$}
+\end{figure}
+
+## Predição
+
+A comparação entre as predições do modelo e os valores observados é feita através de tabelas de classificação, onde as prediçoes são baseadas em pontos de corte.
+
+Os pontos de corte escolhidos para o estudo foram o tradicional __0.5__(Tabela 6), __0.89__(Tabela 7) baseado na proporção de sucessos observados e __0.3__(Tabela 8) como um valor mais baixo para comparação.
+
+\begin{center}Tabela 6: Tabela de classificação com ponto de corte $\textbf{0.5}$.\end{center}
+```{r, echo=FALSE}
+T_6
+```
+
+\begin{center}Tabela 7: Tabela de classificação com ponto de corte $\textbf{0.89}$.\end{center}
+```{r, echo=FALSE}
+T_7
+```
+
+\newpage
+
+\begin{center}Tabela 8: Tabela de classificação com ponto de corte $\textbf{0.3}$.\end{center}
+```{r, echo=FALSE}
+T_8
+```
+
+Pelas tabelas de classificação é possível perceber que, de modo geral, o modelo gera muitas prediçoes de _yes_, quando na realidade são _no_. Isso fica ainda mais claro na tabela comparando sensibilidade e especificidade para cada ponto de corte(Tabela 9). Evidenciando uma alta especificidade e uma baixíssima sensibilidade do modelo.
+
+\begin{center}Tabela 9: Tabela de classificação com ponto de corte $\textbf{0.3}$.\end{center}
+```{r, echo=FALSE}
+T_9
+```
+
+## Curva ROC
+
+Usamos a curva ROC para comparar especificidade e sensibilidade ao longo dos pontos de corte(Figura 5).
+
+\begin{figure}
+\centering
+\includegraphics{ROC.png}
+\caption{}
+\end{figure}
+
+## Regra de Decisão Incorporando Custos
+
+Vamos supor que o custo de classificar um falço não seja 1.5 vezes o de classificar um falso sim 
+(C(S|N) = 1.5 * C(N|S)). Assim, para uma regra de classificação com probabilidades de classificação incorretas P(S|N) e P(N|S), o custo esperado de má classificação (ECMC) fica dado por:
+
+ECMC = C(S|N) \* P(S|N) \* P(N) + C(N|S) \* P(N|S) \* P(S)
+
+Como existe 11% de respostas sim na base, P(S) = 0,11; P(N) = 0,89.
+
+Assim, ECMC = 0.89 \* P(S|N) + 0,165 \* P(N|S)
+
+\begin{figure}
+\centering
+\includegraphics{custo.png}
+\caption{Gráfico de Custo de Classificação}
+\end{figure}
+
+O gráfico mostra que um ponto de corte em torno de 0.4 gera o menor custo de classificação(Figura 6).
+

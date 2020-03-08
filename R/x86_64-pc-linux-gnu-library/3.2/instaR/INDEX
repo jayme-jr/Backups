@@ -1,0 +1,13 @@
+getComments             Returns up to 150 comments on an instagram post
+getFollowers            Get the list of users this user is followed by.
+getFollows              Get the list of users a user follows.
+getLikes                Get the list of users who liked a photo.
+getLocation             Get basic information about a location using a
+                        location ID
+getPopular              Returns 24 popular instagram posts information
+getTagCount             Get number of times a tag has been used
+getUser                 Get basic information about a user
+getUserMedia            Extract recent media published by a user.
+instaOAuth              Create OAuth token to Intagram R session
+searchInstagram         Search public media that mention a specific
+                        hashtag, or that were sent from a given area

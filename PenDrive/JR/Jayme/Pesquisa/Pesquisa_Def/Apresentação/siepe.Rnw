@@ -1,0 +1,234 @@
+\documentclass{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\mode<presentation> {
+
+%--------------------------------------------------
+% Lista de temas(testei um por um haha)
+
+%\usetheme{default}
+%\usetheme{AnnArbor}
+%\usetheme{Antibes}
+%\usetheme{Bergen}
+%\usetheme{Berkeley}
+\usetheme{Berlin}
+%\usetheme{Boadilla}
+%\usetheme{CambridgeUS}
+%\usetheme{Copenhagen}
+%\usetheme{Darmstadt}
+%\usetheme{default}
+%\usetheme{Dresden}
+%\usetheme{Frankfurt}
+%\usetheme{Goettingen}
+%\usetheme{Hannover}
+%\usetheme{Ilmenau}
+%\usetheme{JuanLesPins}
+%\usetheme{Luebeck}
+%\usetheme{Madrid}
+%\usetheme{Malmoe}
+%\usetheme{Marburg}
+%\usetheme{Montpellier}
+%\usetheme{PaloAlto}
+%\usetheme{Pittsburgh}
+%\usetheme{Rochester}
+%\usetheme{Singapore}
+%\usetheme{Szeged}
+%\usetheme{Warsaw}
+
+%--------------------------------------------
+
+% Mudar a cor do tema.(decidi não mexer)
+
+%\usecolortheme{albatross}
+%\usecolortheme{beaver}
+%\usecolortheme{beetle}
+%\usecolortheme{crane}
+%\usecolortheme{dolphin}
+%\usecolortheme{dove}
+%\usecolortheme{fly}
+%\usecolortheme{lily}
+%\usecolortheme{orchid}
+%\usecolortheme{rose}
+%\usecolortheme{seagull}
+%\usecolortheme{seahorse}
+%\usecolortheme{whale}
+%\usecolortheme{wolverine}
+
+%-----------------------------------------------------------------
+
+\setbeamertemplate{footline} % Remover o rodapé de todas as páginas
+%\setbeamertemplate{footline}[page number] % Trocar o rodapé pelo nr de páginas
+%\setbeamertemplate{navigation symbols}{} % Remove todos os símbolos de progresso dos slides
+}
+
+\usepackage{graphicx} % Allows including images
+\usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
+
+%----------------------------------------------------------------------------------------
+%	Capa
+%----------------------------------------------------------------------------------------
+
+\title[Estatística Aplicada a Geopolítica]{Análise do Impacto Socioeconômico de Serviços Inovadores que Competem com Monopólios ou Cartéis} % o que está dentro dos [] aparecerá em todos os slides e dentro das {} aparecerá na capa
+\author{Jayme Gomes dos Santos Junior} 
+\institute[Universidade Federal do Paraná] 
+{
+  \inst{}%
+  Paulo Afonso Bracarense Costa\\
+  Orientador
+  }
+\date{}
+%\textit{jaymegomesdossantosjunior@gmail.com} % e-mail(decidi não deixar)
+%}
+
+\logo{\includegraphics[width=3cm]{logo-pet-azul}}
+%-------------------------------------------------------------------------------------
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+\begin{frame}
+\titlepage % Mostra a capa como primeiro slide
+\end{frame}
+
+%\begin{frame}
+%\frametitle{índice} % Sumário
+%\tableofcontents % Se forem acrescentadas sessões e subsessões, com esse comando, elas serão colocadas automaticamente no sumário
+%\end{frame}
+
+%----------------------------------------------------------------------------------------
+%	Slides
+%----------------------------------------------------------------------------------------
+
+%------------------------------------------------
+%\section{Motivação} 
+%------------------------------------------------
+
+%\subsection{Teoria de Rifkin} 
+
+%------------------------------------------------
+
+%\begin{frame}
+%\frametitle{Motivação - Terceira Revolução Industrial}
+%\pause
+%\begin{itemize}
+%\item Teoria de Rifkin
+%\pause
+%\item Eclipse do capitalismo como conhecemos
+%\pause
+%\item Mudança de paradigma econômico
+%\pause
+%\item Terceira revolução industrial
+%\end{itemize}
+%\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Objetivo}
+%\pause
+%\begin{itemize}
+%\item Teoria de Rifkin
+%\pause
+%\item Eclipse do capitalismo como conhecemos
+%\pause
+%\item Mudança de paradigma econômico
+%\pause
+%\item Terceira revolução industrial
+%\end{itemize}
+\begin{block}
+
+A pesquisa tem como objetivo encontrar evidências
+de que o fenômeno da mudança de paradgma econômico
+apontado por Rifkin está acontecendo no Brasil.
+\end{block}
+\end{frame}
+
+%------------------------------------------------
+%\section{Materiais de Apoio}
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Metodologia}
+\begin{itemize}
+\item Monitoramento de tweets no período de 17/04 a 31/08 de 2017;
+\pause
+\item Coleta dos tweets e extração de seus conteúdos;
+\pause
+\item Tratamento e análise dos dados.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Análise de Sentimento}
+\begin{itemize}
+\item Gráfico aqui;
+\pause
+\item Mais um gráfico aqui;
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------
+%\section{Ferramentas}
+%------------------------------------------------
+
+%\subsection{Mendeley}
+
+\begin{frame}
+\frametitle{Notas de Conclusão}
+\begin{itemize}
+\item Desafios;
+\pause
+\item Evidência;
+\pause
+\item Futuro.
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------
+
+%\subsection{R}
+
+%\begin{frame}
+%\frametitle{Mineração de Texto}
+%\pause
+%\begin{itemize}
+%\item Tweeter - API e pacote R
+%\pause
+%\item Pacote Selenium para o Google Play
+%\pause
+%\item Ferramentas de manipulação de texto
+%\pause
+%\item Análise posterior
+%\end{itemize}
+%\end{frame}
+
+%------------------------------------------------
+%\section{Desafios}
+%------------------------------------------------
+
+%\begin{frame}
+%\frametitle{Hiato}
+%\begin{itemize}
+%\item Desorganização
+%\item Tempos difíceis
+%\end{itemize}
+%\end{frame}
+
+%------------------------------------------------
+
+%\begin{frame}
+%\frametitle{Duvidas}
+%\begin{itemize}
+%\item Pós leitura de materiais
+%\end{itemize}
+%\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\Huge{\centerline{OBRIGADO!}}
+\end{frame}
+
+%----------------------------------------------------------------------------------------

@@ -1,0 +1,63 @@
+---
+title: "Capítulo 2 - Essencial"
+output: html_document
+---
+
+
+#2.1 Instalação e Interfaces
+
+**Importante!** Sempre instalar o R antes do RStudio, pois o Rstudio é 
+apenas uma interface para o R, portanto, precisa encontrar a instalação 
+do R para poder ser instalado.
+
+##Windows
+>##R
+1. Entrar no site <https://cran.r-project.org/>;
+2. Selecionar o link `Download R for Windows`;
+3. Em `Subdrectories`, selecionar o link `base`;
+4. Nesta página estará em destaque o link da ultima versão disponível do
+   R para windows. Clicar no link e fazer o dwonload;
+5. Após o download concluído, abrir o `.exe` e seguir o procedimento de 
+   qualquer instalação.
+Ou entrar neste [link](https://cran.r-project.org/bin/windows/base/R-3.3.2-win.exe)
+e baixar a versão 3.3.2 do R para windows.
+
+>##RStudio
+1. Entrar no site <https://www.rstudio.com/>;
+2. Na aba `Products`, selecionar `RStudio`;
+3. Na opção `Desktop`, clicar em `DOWNLOAD RSTUDIO DESKTOP`;
+4. Nesta página é mostrada a ultima versão do integrated development 
+environment(IDE). Na parte `Installers`, selecioanar o link do instalador
+para `windows`;
+5. Após o download concluído, abrir o `.exe` e seguir o procedimento de 
+   qualquer instalação.
+Ou entrar neste [link](https://download1.rstudio.org/RStudio-1.0.44.exe)
+e baixar RStudio 1.0.44 - Windows Vista/7/8/10.   
+
+##Linux
+
+>##R
+1. Entrar no site <https://cran.r-project.org/>;
+2. Selecionar o link `Download R for Linux`;
+3. Selecionar conforme sua distribuição linux: `debian`, `redhat`, 
+`suse`, `ubuntu`;
+>>##debian
+1. Esta página contém as informações do R em relação a esta distribuição;
+2. Para a instalação, executar no terminal:
+```{r results='hide', eval=FALSE}
+apt-get install r-base r-base-dev
+```
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

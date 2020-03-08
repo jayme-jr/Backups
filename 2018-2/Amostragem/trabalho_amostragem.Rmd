@@ -1,0 +1,103 @@
+---
+title: "Trabalho de Métodos de Amostragem"
+author: "Jayme Gomes dos Santos Junior"
+date: "Curitiba 2018"
+output:
+  pdf_document:
+    df_print: kable
+    keep_tex: yes
+    number_sections: yes
+    toc: yes
+header-includes: \usepackage{float}
+                 \usepackage[brazil]{babel}
+                 \usepackage{amsmath}
+                 \usepackage{bm}
+                 \usepackage{graphicx}
+---
+
+\newpage
+
+
+```{r echo=FALSE, results ='hide', warning = FALSE, message = FALSE}
+library(utils)
+library(kableExtra)
+library(combinat)
+library(tinytex)
+library(MASS)
+# Trabalho 1
+## Tabela 1
+x1 <- c("y1", "y2", "y3", "y4", "y5", "y6")
+y1 <- c(2, 4, 5, 7, 8, 9)
+df1 <- data.frame(x = x1, y = y1)
+t1_1 <- knitr::kable(df1, align = 'clc',
+             caption = "População de Tamanho N = 6",
+             col.names = c("População", "Valores"))
+mp1 <- round(sum(df1$y)/6, digits = 2)
+## Tabela 2
+# Coluna de todas as amostras possíveis de tamanho 2
+amostras2 <- combn2(y1) # Todas as amostras tamanho 2
+amostras2 <- paste(amostras2[,1], amostras2[,2], sep = ",") # transformando num vetor só
+# Coluna das médias amostrais 'ys' 
+ys2 <- combn(y1, 2, mean) # Todas as médias das amostras de tamanho 2
+# Coluna das probabilidades ys 'P(ys)' 
+pys2 <- rep("1/15", 15)
+# Coluna 'ys.P[ys]'
+yspys2 <- round(ys2/15, digits = 2)
+#Criando a tabela de n = 2
+n2 <- cbind(amostras2, ys2, pys2, yspys2)
+# criando a tablea para n = 2
+df2 <- as.data.frame(n2)
+colnames(df2) <- c("Amostra", "ys", "P(ys)", "ys.P(ys)")
+# Média amostral de todas as amostras de tamanho 2 possíveis
+ma2 <- sum(yspys2)
+t1_2 <- knitr::kable(df2, align = 'clc',
+             caption = "Amostras Possíveis com n = 2")
+## Tabela 3
+
+## Tabela 4
+
+```
+
+# Trabalho 1
+
+## Teorema 1
+
+Tendo uma população de tamanho **N**, ao extrair uma amostra de tamanho **n**, temos que o estimador não evezado para $\overline{Y}$ é:
+$$
+\overline{y} = \sum_{i=1}^n\dfrac{y_i}{n}
+$$
+
+## Exercício 
+
+```{r echo=FALSE}
+t1_1
+```
+
+\newpage
+
+Com base na população dada na tabela 1, encontrar a média de todas as combinações possíveis de amostras de tamanhos: n = 2, n = 3 e n = 4.
+
+### Resolução
+
+Sabendo que a média populacional é dada por:
+
+$$
+\overline{Y} = \sum_{i=1}^N\dfrac{y_i}{N} = \dfrac{2+4+5+7+8+9}{6} = 5.833
+$$
+O objetivo é mostrar que a média de todas as combinações de amostras possíveis terão o mesmo valor da média populacional.
+
+*OBS:* ys = médias amostrais, P(ys) = probabilidade de cada amostra acontecer e ys.P(ys) = média amostral multiplicada pela sua probabilidade.
+
+\newpage
+
+####Para n = 2, temos:
+
+```{r echo=FALSE, results='asis'}
+t1_2
+```
+
+Comparando os resultados das médias populacional e amostral com n = 2, temos que:
+
+Média populacional `r mp1` = Média de todas as amostras possíveis de tamanho 2 `r ma2`
+
+

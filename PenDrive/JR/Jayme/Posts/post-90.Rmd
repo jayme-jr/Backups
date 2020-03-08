@@ -1,0 +1,22 @@
+---
+title: "Linguagem GO"
+author: "Jayme Jr"
+output: pdf_document
+---
+
+A linguagem de programação **GO** foi criada pelo engenheiro de software
+e escritor Rob Pike e pelo cientista da computação Kenneth Thompson.
+
+Foi lançada no fim de 2007 pela Google e posteriormente, em 2009, 
+lançada em código livre.
+
+Ela veio para resolver problemas de infraestrutura de desenvolvimento de
+software na Google. É baseada em C++, Java e Phyton.
+
+A linguagem inclui um rigoroso manejamento de dependência, a 
+adaptabilidade da arquitetura de software conforme o sistema cresce e a 
+robustez ao longo dos limites entre componentes. O que melhora o 
+rendimento no ambiente de trabalho.
+
+Hoje em dia muitas empresas interessadas em front-end e alta performance
+na computação estão de olho na linguagem **GO**.

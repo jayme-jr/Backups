@@ -1,0 +1,35 @@
+---
+title: A problemática dos acidentes de trânsito na Região Metropolitana de Curitiba utilizando a estatística espacial 
+author: "Marcelo José Martins Júnior"
+co-author: "Dr.Prof.Paulo Afonso Bracarense Costa"
+date: "PET-Estatística"
+output:
+    beamer_presentation:
+        theme: "AnnArbor"
+        fig_caption: True
+        incremental: true
+        
+        
+---
+#Objetivos
+
+- Objetivo geral: Indicar qual setor relacionado ao trânsito de Curitiba e Região Metropolitana (RMC), possui maior concentração de acidentes de trânsito.
+
+- Objetivos específicos: 
+
+1. Indicar o setor de maior problemática geoespacial na concentração de acidentes;
+2. Com o uso da estatística espacial, bem como, informações de órgãos de monitoramento do trânsito de Curitiba e RMC, estudar as regiões e setores deficientes na questão de concentração de acidentes;
+3. Comparar e analisar os dados da pesquisa de estatística espacial, e os dados existentes fornecidos por grandes órgãos do estado.
+
+
+# O que é a Estatística Espacial?
+
+- Conjunto de métodos de análise de dados em que a localização geográfica é usada explicitamente na modelagem
+
+- Vale ressaltar que nem todos os dados fazem uso da estatística espacial na análise. 
+
+
+
+
+
+

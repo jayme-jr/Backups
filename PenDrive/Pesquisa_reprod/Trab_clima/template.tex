@@ -1,0 +1,155 @@
+\documentclass[a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+
+\usepackage{geometry}
+\geometry{a4paper, left=40mm, right=40mm, top=25mm, bottom=25mm}
+
+% Cores: http://latexcolor.com/.
+\usepackage{xcolor}
+\definecolor{utahcrimson}{rgb}{0.83, 0.0, 0.25}
+\newcommand{\tc}[1]{\textcolor{utahcrimson}{#1}}
+
+\usepackage{hyperref}
+\hypersetup{colorlinks = true}
+
+\title{Análise do Clima em Curitiba para o período AAA a BBB}
+\author{Acadêmico HHH}
+\date{20 de março de 2018}
+
+\usepackage{Sweave}
+\begin{document}
+\input{template-concordance}
+
+\maketitle
+
+Use a construção \verb|\tc{|\verb|\|\verb|Sexpr{<cmd>}}| para destacar o uso dos
+recursos do Sweave/Knitr.
+
+\begin{Schunk}
+\begin{Sinput}
+> so <- Sys.info()["sysname"]
+> if (so == "Linux") {
++     frase <- "A propósito, parabéns por usar Linux"
++ } else {
++     frase <- sprintf("Como assim você usa %s? Use Linux", so)
++ }
+\end{Sinput}
+\end{Schunk}
+
+Esse relatório foi feito no \tc{Linux}. \tc{A propósito, parabéns por usar Linux}.
+
+\begin{Schunk}
+\begin{Sinput}
+> # Sobre detalhes de como formatar datas.
+> 
+> x <- "20/03/2018 22:00:00"
+> dt <- as.POSIXct(x = x, format = "%d/%m/%Y %H:%M:%S")
+> dt
+\end{Sinput}
+\begin{Soutput}
+[1] "2018-03-20 22:00:00 BRT"
+\end{Soutput}
+\begin{Sinput}
+> # Extração de partes da estampa.
+> strftime(dt, format = "%A") # Dia da semana.
+\end{Sinput}
+\begin{Soutput}
+[1] "terça"
+\end{Soutput}
+\begin{Sinput}
+> strftime(dt, format = "%a") # Dia da semana abreviado.
+\end{Sinput}
+\begin{Soutput}
+[1] "Ter"
+\end{Soutput}
+\begin{Sinput}
+> strftime(dt, format = "%w") # Número do dia da semana (Seg = 1).
+\end{Sinput}
+\begin{Soutput}
+[1] "2"
+\end{Soutput}
+\begin{Sinput}
+> strftime(dt, format = "%B") # Nome do mês.
+\end{Sinput}
+\begin{Soutput}
+[1] "março"
+\end{Soutput}
+\begin{Sinput}
+> strftime(dt, format = "%b") # Nome do mês abreviado.
+\end{Sinput}
+\begin{Soutput}
+[1] "Mar"
+\end{Soutput}
+\begin{Sinput}
+> strftime(dt, format = "%m") # Número do mês.
+\end{Sinput}
+\begin{Soutput}
+[1] "03"
+\end{Soutput}
+\begin{Sinput}
+> strftime(dt, format = "%d") # Dia do mês.
+\end{Sinput}
+\begin{Soutput}
+[1] "20"
+\end{Soutput}
+\begin{Sinput}
+> strftime(dt, format = "%j") # Dia do ano, de 1 até 365/366.
+\end{Sinput}
+\begin{Soutput}
+[1] "079"
+\end{Soutput}
+\begin{Sinput}
+> strftime(dt, format = "%Y") # Ano.
+\end{Sinput}
+\begin{Soutput}
+[1] "2018"
+\end{Soutput}
+\begin{Sinput}
+> strftime(dt, format = "%y") # Ano só a dezena.
+\end{Sinput}
+\begin{Soutput}
+[1] "18"
+\end{Soutput}
+\begin{Sinput}
+> strftime(dt, format = "%H") # Hora.
+\end{Sinput}
+\begin{Soutput}
+[1] "22"
+\end{Soutput}
+\begin{Sinput}
+> strftime(dt, format = "%M") # Minuto.
+\end{Sinput}
+\begin{Soutput}
+[1] "00"
+\end{Soutput}
+\begin{Sinput}
+> strftime(dt, format = "%S") # Segundo.
+\end{Sinput}
+\begin{Soutput}
+[1] "00"
+\end{Soutput}
+\begin{Sinput}
+> agora <- as.POSIXct(Sys.time())
+> falta <- dt - agora
+> nd <- as.numeric(falta, units = "days")
+> if (nd > 2) {
++     prazo <- sprintf(
++         "Faltam %d dias e %0.1f horas para entregar o trabalho",
++         nd %/% 1,
++         (nd %% 1) * 24)
++ } else if (nd > 1) {
++     prazo <- sprintf(
++         "Faltam 1 dia e %0.1f horas para entregar o trabalho",
++         (nd %% 1) * 24)
++ } else {
++     prazo <- sprintf(
++         "Falta %0.1f horas para entregar o trabalho",
++         nd * 24)
++ }
+\end{Sinput}
+\end{Schunk}
+
+\tc{Faltam 6 dias e 5.3 horas para entregar o trabalho}.
+
+\end{document}

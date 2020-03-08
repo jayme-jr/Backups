@@ -1,0 +1,72 @@
+rm(list=ls())
+setwd("C:/Users/l04211/Desktop/Biometria")
+
+library("drc")      # drm
+require("nlstools") # confint2
+require(ggplot2)
+require(MASS)
+
+data <- read.csv("Grupo_1_base2.csv", sep = ";", dec = ",")
+
+# Modelos
+# Binomial - logito
+fit0 <- glm(resposta/n ~ dose, family = binomial(link = 'logit'), weights = n, data = data)
+summary(fit0)
+
+# Binomial - probito
+fit1 <- glm(resposta/n ~ dose, family = binomial(link = 'probit'), weights = n, data = data)
+summary(fit1)
+
+# Binomial - c-loglog
+fit2 <- glm(resposta/n ~ dose, family = binomial(link = 'cloglog'), weights = n, data = data)
+summary(fit2)
+
+# Comparando os modelos
+comp_modelos <- data.frame("AIC" = c(AIC(fit0), AIC(fit1), AIC(fit2)),
+                           "BIC" = c(BIC(fit0), BIC(fit1), BIC(fit2)),
+                           "logLik" = (c(logLik(fit0), logLik(fit1), logLik(fit2))))
+row.names(comp_modelos) <- c("logit", "probit", "cloglog")
+comp_modelos # probit
+
+# Curvas Dose-Resposta por grupo
+summary(fit0)
+
+ggplot(data, aes(x = dose, y = resposta/n, weight = n)) + geom_point(size = 2) +
+  geom_smooth(method = "glm",  se = F, colour = 'blue', method.args = list(family = binomial(link = 'logit'))) +
+  geom_smooth(method = "glm",  se = F, colour = 'red', method.args = list(family = binomial(link = 'probit'))) +
+  geom_smooth(method = "glm",  se = F, colour = 'green', method.args = list(family = binomial(link = 'cloglog'))) +
+  theme_bw() ### A curva em vermelho representa o ajuste do modelo com funcao probito, que produziu menor AIC e BIC.
+
+# Equacao e interpretacao dos modelos
+# GLM poison com diferentes ligacoes
+
+# Estimativas pontuais e EP
+summary(fit0)
+summary(fit1)
+summary(fit2)
+
+# IC 95%
+confint2(fit0, level = 0.95)
+confint2(fit1, level = 0.95)
+confint2(fit2, level = 0.95)
+
+# Teste de falta de ajuste
+
+# Predicao 3 doses
+new.data <- data.frame("dose" = c(0.25, 0.5, 0.75))
+
+predict(fit0, newdata = new.data, type = 'response', se.fit = T) #logit
+predict(fit1, newdata = new.data, type = 'response', se.fit = T) #probit
+predict(fit2, newdata = new.data, type = 'response', se.fit = T) #cloglog
+
+# ED
+ed0 <- dose.p(fit0, cf = c(1,2), p = c(0.25,0.5,0.75));ed0 #logit
+ed1 <- dose.p(fit1, cf = c(1,2), p = c(0.25,0.5,0.75));ed1 #probit
+ed2 <- dose.p(fit2, cf = c(1,2), p = c(0.25,0.5,0.75));ed2 #cloglog
+
+# IC para ED
+data.frame(c(ed0), LI = c(ed0) -1.96 * attr(ed0, "SE"), LS = c(ed0) +1.96 * attr(ed0, "SE"))
+data.frame(c(ed1), LI = c(ed1) -1.96 * attr(ed1, "SE"), LS = c(ed1) +1.96 * attr(ed1, "SE"))
+data.frame(c(ed2), LI = c(ed2) -1.96 * attr(ed2, "SE"), LS = c(ed2) +1.96 * attr(ed2, "SE"))
+
+

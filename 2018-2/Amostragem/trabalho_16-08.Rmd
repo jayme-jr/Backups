@@ -1,0 +1,179 @@
+---
+title: "Trabalho 16/08/2018 Métodos de Amostragem"
+author: "Jayme Junior"
+output: 
+  pdf_document: 
+    keep_tex: yes
+---
+
+```{r echo=FALSE, results ='hide', warning = FALSE, message = FALSE}
+
+library(combinat)
+library(tinytex)
+x <- c(2, 4, 5, 7, 8, 9) # População
+
+# AMOSTRA TAMANHO 2
+
+# Coluna de todas as amostras 'Amostra'
+amostras2 <- combn2(x) # Todas as amostras tamanho 2
+amostras2
+amostras2 <- paste(amostras2[,1], amostras2[,2], sep = ",") # transformando num vetor só
+#coluna das médias amostrais 'ys' 
+ys2 <- combn(x, 2, mean) # Todas as médias das amostras de tamanho 2
+ys2
+
+#Coluna das probabilidades ys 'P(ys)' 
+pys2 <- rep("1/15", 15)
+pys2
+
+#Coluna 'ys.P[ys]'
+yspys2 <- ys2/15
+yspys2
+
+#Criando a tabela de n = 2
+n2 <- cbind(amostras2, ys2, pys2, yspys2)
+n2
+
+# criando a tablea para n = 2
+df2 <- as.data.frame(n2)
+df2
+colnames(df2) <- c("Amostra", "ys", "P(ys)", "ys.P(ys)")
+
+#-----------------------------------------------------------------------------------
+# AMOSTRA TAMANHO 3
+
+# Coluna de todas as amostras 'Amostra'
+amostras3 <- combn(x, 3, byrow = TRUE) # Todas as amostras tamanho 2
+amostras3 <- t(amostras3) # Transpondo a matriz para poder usar o paste
+amostras3
+amostras3 <- paste(amostras3[,1], amostras3[,2], amostras3[,3], sep = ",") # transformando num vetor só
+#coluna das médias amostrais 'ys' 
+ys3 <- combn(x, 3, mean) # Todas as médias das amostras de tamanho 2
+ys3
+
+#Coluna das probabilidades ys 'P(ys)' 
+pys3 <- rep("1/20", 20)
+pys3
+
+#Coluna 'ys.P[ys]'
+yspys3 <- ys3/20
+yspys3
+
+#Criando a tabela de n = 2
+n3 <- cbind(amostras3, ys3, pys3, yspys3)
+n3
+
+# criando a tablea para n = 2
+df3 <- as.data.frame(n3)
+df3
+colnames(df3) <- c("Amostra", "ys", "P(ys)", "ys.P(ys)")
+
+
+#Verificação das médias populacional e amostral
+mean(x)
+sum(yspys3)
+
+#-----------------------------------------------------------------------------------
+# AMOSTRA TAMANHO 4
+
+# Coluna de todas as amostras 'Amostra'
+amostras4 <- combn(x, 4) # Todas as amostras tamanho 2
+amostras4 <- t(amostras4) # Transpondo a matriz para poder usar o paste
+amostras4
+amostras4 <- paste(amostras4[,1], amostras4[,2], amostras4[,3], 
+                   amostras4[,4], sep = ",") # transformando num vetor só
+#coluna das médias amostrais 'ys' 
+ys4 <- combn(x, 4, mean) # Todas as médias das amostras de tamanho 2
+ys4
+
+#Coluna das probabilidades ys 'P(ys)' 
+pys4 <- rep("1/15", 15)
+pys4
+
+#Coluna 'ys.P[ys]'
+yspys4 <- ys4/15
+yspys4
+
+#Criando a tabela de n = 2
+n4 <- cbind(amostras4, ys4, pys4, yspys4)
+n4
+
+# criando a tablea para n = 2
+df4 <- as.data.frame(n4)
+df4
+colnames(df4) <- c("Amostra", "ys", "P(ys)", "ys.P(ys)")
+
+
+#Verificação das médias populacional e amostral
+mean(x)
+sum(yspys4)
+
+# DataFrame total
+ttl <- rbind(n2, n3, n4)
+ttl
+dfttl <- as.data.frame(ttl)
+colnames(dfttl) <- c("Amostra", "ys", "P(ys)", "ys.P(ys)")
+dfttl
+```
+
+# Para n = 2
+
+```{r echo=FALSE, results="asis"}
+knitr::kable(df2)
+sprintf("Comparando média amostral n=2: %0.2f e populacional: %0.2f temos que são iguais.",
+        sum(yspys2), mean(x))
+```
+
+# Para n = 3
+
+```{r echo=FALSE, results="asis"}
+knitr::kable(df3)
+sprintf("Comparando média amostral n=3: %0.2f e populacional: %0.2f temos que são iguais.",
+        sum(yspys3), mean(x))
+```
+
+# Para n = 4
+
+```{r echo=FALSE, results="asis"}
+knitr::kable(df4)
+sprintf("Comparando média amostral n=4: %0.2f e populacional: %0.2f temos que são iguais.",
+        sum(yspys4), mean(x))
+```
+
+# Para todas as amostras n=2, n=3 e n=4
+
+```{r echo=FALSE, results="asis"}
+knitr::kable(dfttl)
+
+```
+
+# Trabalho 2 - 23/08
+
+## n=2
+
+```{r}
+Y2 <- sum(yspys2)
+Y <- mean(x)
+sum((ys2 - Y)^2) * (1/15)
+((6-2)/6) * (sum(((ys2 - Y)^2)/5)/2)
+
+```
+
+## n=3
+
+```{r}
+Y <- mean(x)
+sum((ys3 - Y)^2) * (1/20)
+((6-3)/6) * (sum(((ys3 - Y)^2)/5) * (1/3))
+
+```
+
+## n=4
+
+```{r}
+Y <- mean(x)
+sum((ys4 - Y)^2) * (1/15)
+((6-4)/6) * (sum(((ys4 - Y)^2)/5) * (1/4))
+
+
+```

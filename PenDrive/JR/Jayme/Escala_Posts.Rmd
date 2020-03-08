@@ -1,0 +1,23 @@
+---
+title: "Rodizio dos Posts"
+author: 
+output: pdf_document
+---
+ 
+#Novo rodizio de posts.
+ 
+| Datas |  Autor   | Corretor |
+|:-----:|:--------:|:--------:|
+| 14/08 |  Nilton  | Jhenifer |
+| 21/08 | Jhenifer |  Jayme   |
+| 28/08 |  Jayme   |  Nivea   |
+| 04/09 |  Nivea   |  Rafael  |
+| 11/09 |  Rafael  | Vinicius |
+| 18/09 | Vinicius | William2 |
+| 25/09 | William2 |  Lineu   |
+| 09/10 |  Lineu   | Augusto  |
+| 16/10 | Augusto  | William  |
+| 23/10 | William  | Altamiro |
+| 30/10 | Altamiro |  Walmes  |
+| 06/11 |  Walmes  |  Nilton  |
+

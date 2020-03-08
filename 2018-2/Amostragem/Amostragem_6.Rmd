@@ -1,0 +1,57 @@
+---
+title: "Trabalho 6"
+author: "Rafael Morciani"
+date: "5 de setembro de 2017"
+output:
+  pdf_document: default
+---
+
+# Trabalho 6
+Para efeito de planejamento, na empresa conhecer com uma boa precisão o tempo médio para se realizar na nova atividade em um processo de produção a ser implantado, nessa linha de produção existem 100 empregados e para se estimar o tamanho de amostra necessário foi selecionado na amostra piloto com 5 empregados, os tempos observados foram: 25, 35, 26, 34 e 30.
+
+O erro relativo aceitável foi de 5% e o grau de confiança de 95%. Com base nessas informações, qual é o tamanho da amostra? Calcular para $n_0$=5, $n_0$=500 e $t_0$=1,96.
+
+**Para fins de cálculos:**
+
+$N=100$,
+$\alpha$=0,05,
+r=0,05,
+s=4,53,
+$\bar{y}$=30,
+$n_0=(\frac{ts}{r \bar{y}})^2$,
+n=$\frac{n_0}{1+\frac{n_0}{N}}$.
+
+###$n_0$=5
+
+$$n_0=5   \rightarrow t_4=2,7764     \rightarrow n_0=70,3    \rightarrow n=41$$
+$$n_0=41  \rightarrow t_{40}=2,0211  \rightarrow n_0=37,255  \rightarrow n=27$$
+$$n_0=27  \rightarrow t_{26}=2,0555  \rightarrow n_0=38,534  \rightarrow n=28$$
+$$n_0=28  \rightarrow t_{27}=2,0518  \rightarrow n_0=38,40   \rightarrow n=28$$
+
+Tamanho da amostra: n=28.
+
+###$n_0$=500
+$$
+n_0=500 \rightarrow t_{499}=1,96   \rightarrow n_0=35,04   \rightarrow n=26
+$$
+$$
+n_0=26  \rightarrow t_{40}=2,0595  \rightarrow n_0=38,68   \rightarrow n=28
+$$
+$$
+n_0=28  \rightarrow t_{26}=2,0518  \rightarrow n_0=38,534  \rightarrow n=28
+$$
+Tamanho da amostra: n=28.
+
+###t=1,96
+$$
+t=1,96  \rightarrow n_0=35,04      \rightarrow n=26
+$$
+$$
+n_0=26  \rightarrow t_{25}=2,0595  \rightarrow n_0=38,68  \rightarrow n=28
+$$
+$$
+n_0=28  \rightarrow t_{27}=2,0518  \rightarrow n_0=38,534  \rightarrow n=28
+$$
+Tamanho da amostra: n=28
+
+

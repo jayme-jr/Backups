@@ -1,0 +1,18 @@
++++
+Para utilizar hyperlinks, o formato é '[id da url]: url' e para 
+colocar no texto '[nome do link][id da url]' ou 
+'[nome do link = id da url][]'
+exemplo:
+
+texto
+# hyper link com qualquer texto
+"blablablabla [texto do link][id da url]"
+ou
+# hyperlink onde o testo do link = a id do da url
+"blablabla [id da url][]"
+
++++
+
+Adicionando posts
+
+

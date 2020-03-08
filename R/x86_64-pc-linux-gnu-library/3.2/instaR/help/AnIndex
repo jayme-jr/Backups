@@ -1,0 +1,11 @@
+getComments	getComments
+getFollowers	getFollowers
+getFollows	getFollows
+getLikes	getLikes
+getLocation	getLocation
+getPopular	getPopular
+getTagCount	getTagCount
+getUser	getUser
+getUserMedia	getUserMedia
+instaOAuth	instaOAuth
+searchInstagram	searchInstagram

@@ -1,0 +1,202 @@
+<html>
+
+<head>
+<style type="text/css">
+.knitr .inline {
+  background-color: #f7f7f7;
+  border:solid 1px #B0B0B0;
+}
+.error {
+	font-weight: bold;
+	color: #FF0000;
+}
+.warning {
+	font-weight: bold;
+}
+.message {
+	font-style: italic;
+}
+.source, .output, .warning, .error, .message {
+	padding: 0 1em;
+  border:solid 1px #F7F7F7;
+}
+.source {
+  background-color: #f5f5f5;
+}
+.rimage .left {
+  text-align: left;
+}
+.rimage .right {
+  text-align: right;
+}
+.rimage .center {
+  text-align: center;
+}
+.hl.num {
+  color: #AF0F91;
+}
+.hl.str {
+  color: #317ECC;
+}
+.hl.com {
+  color: #AD95AF;
+  font-style: italic;
+}
+.hl.opt {
+  color: #000000;
+}
+.hl.std {
+  color: #585858;
+}
+.hl.kwa {
+  color: #295F94;
+  font-weight: bold;
+}
+.hl.kwb {
+  color: #B05A65;
+}
+.hl.kwc {
+  color: #55aa55;
+}
+.hl.kwd {
+  color: #BC5A65;
+  font-weight: bold;
+}
+</style>
+<title>Sabatina_Clima_RHTML</title>
+<meta charset="utf-8"></meta>
+</head>
+
+<body>
+
+
+
+<h1>Análise do Clima em Colombo para o período <code class="knitr inline">30/01/2018</code> a <code class="knitr inline">08/02/2018</code></h1>
+<p align="right"><font size="-1">Acadêmico Jayme Gomes dos Santos Junior</font></p>
+
+<p>Este relatório utiliza os dados climáticos da cidade de Colombo no período de <font color="blue"<code class="knitr inline">10</code></font> dias compreendidos entre <font color="blue"<code class="knitr inline">30/01/2018</code></font> e <font color="blue"<code class="knitr inline">08/02/2018</code></font>. <font color="blue"<code class="knitr inline">O dia com maior precipitação no período foi 07/02/2018 com precipitação de 3.8mm</code></font><!--, como mostra a primeira figura "citar a primeira figura"--></p>
+<!--Na hora de mudar a cor das respostar por objetos R com <font>, se usado: 
+<font...códigoR></font> aparece parecido com a versão sweave, já se usar da forma comum:
+>font...>códigoR</font> sai com uma fonte muito menor-->
+<figure id="fig1", align="center">
+<div class="chunk" id="unnamed-chunk-2"><div class="rimage default"><img src="figure/unnamed-chunk-2-1.png" title="plot of chunk unnamed-chunk-2" alt="plot of chunk unnamed-chunk-2" class="plot" /></div></div>
+  <figcaption>Figura1: Precipitação registrada a cada hora em Colombo.</figcaption>
+</figure>
+
+<div class="chunk" id="unnamed-chunk-3"><div class="rcode"><table id="1" class="table table-striped table-hover" style="margin-left: auto; margin-right: auto;">
+<caption>Tabela1: Tabela da temperatura média, máxima e mínima de cada dia do período</caption>
+ <thead>
+  <tr>
+   <th style="text-align:center;"> Data </th>
+   <th style="text-align:center;"> Temperatura.Média </th>
+   <th style="text-align:center;"> Temperatura.Máxima </th>
+   <th style="text-align:center;"> Temperatura.Mínima </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:center;"> 01/02/2018 </td>
+   <td style="text-align:center;"> 17.83750 </td>
+   <td style="text-align:center;"> 23.8 </td>
+   <td style="text-align:center;"> 13.9 </td>
+  </tr>
+  <tr>
+   <td style="text-align:center;"> 02/02/2018 </td>
+   <td style="text-align:center;"> 19.17500 </td>
+   <td style="text-align:center;"> 26.1 </td>
+   <td style="text-align:center;"> 14.7 </td>
+  </tr>
+  <tr>
+   <td style="text-align:center;"> 03/02/2018 </td>
+   <td style="text-align:center;"> 18.45417 </td>
+   <td style="text-align:center;"> 25.5 </td>
+   <td style="text-align:center;"> 11.0 </td>
+  </tr>
+  <tr>
+   <td style="text-align:center;"> 04/02/2018 </td>
+   <td style="text-align:center;"> 18.06250 </td>
+   <td style="text-align:center;"> 22.7 </td>
+   <td style="text-align:center;"> 15.6 </td>
+  </tr>
+  <tr>
+   <td style="text-align:center;"> 05/02/2018 </td>
+   <td style="text-align:center;"> 18.14783 </td>
+   <td style="text-align:center;"> 24.0 </td>
+   <td style="text-align:center;"> 15.2 </td>
+  </tr>
+  <tr>
+   <td style="text-align:center;"> 06/02/2018 </td>
+   <td style="text-align:center;"> 18.17500 </td>
+   <td style="text-align:center;"> 25.6 </td>
+   <td style="text-align:center;"> 13.0 </td>
+  </tr>
+  <tr>
+   <td style="text-align:center;"> 07/02/2018 </td>
+   <td style="text-align:center;"> 18.56957 </td>
+   <td style="text-align:center;"> 26.2 </td>
+   <td style="text-align:center;"> 14.7 </td>
+  </tr>
+  <tr>
+   <td style="text-align:center;"> 08/02/2018 </td>
+   <td style="text-align:center;"> 21.22083 </td>
+   <td style="text-align:center;"> 28.5 </td>
+   <td style="text-align:center;"> 17.1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:center;"> 30/01/2018 </td>
+   <td style="text-align:center;"> 17.41667 </td>
+   <td style="text-align:center;"> 21.6 </td>
+   <td style="text-align:center;"> 15.3 </td>
+  </tr>
+  <tr>
+   <td style="text-align:center;"> 31/01/2018 </td>
+   <td style="text-align:center;"> 19.01250 </td>
+   <td style="text-align:center;"> 25.4 </td>
+   <td style="text-align:center;"> 15.4 </td>
+  </tr>
+</tbody>
+</table>
+
+</div></div>
+
+
+<!--usar trunc() no objeto tm para não mostrar casas decimais-->
+<p><font color="blue"<code class="knitr inline">08/02/2018</code></font> foi o dia com a temperatura média mais alta, <font color="blue"<code class="knitr inline">21</code></font>°C. Já a temperatura mais baixa de todo o período foi <font color="blue"<code class="knitr inline">11</code></font>°C no dia <font color="blue"<code class="knitr inline">03/02/2018</code></font> e a mais alta ocorreu no dia <font color="blue"<code class="knitr inline">08/02/2018</code></font> alcançando <font color="blue"<code class="knitr inline">28.5</code></font>°C.
+</p>
+
+<figure id="fig2", align="center">
+<div class="chunk" id="unnamed-chunk-4"><div class="rimage default"><img src="figure/unnamed-chunk-4-1.png" title="plot of chunk unnamed-chunk-4" alt="plot of chunk unnamed-chunk-4" class="plot" /></div></div>
+  <figcaption>Relação entre a temperatura e precipitação a cada dia.</figcaption>
+</figure>
+
+
+<!--Para referência interna, usamos <a href="#id do que será referenciado>texto do hiperlink</a>-->
+<p>Já na figura<a href="#fig2">2</a> vemos a relação entre a temperatura e a precipitação em cada dia do período.</p>
+
+<p>Todo o relatório foi feito utilizando o <a href="#R">R</a>.</p>
+
+<p>Na figura<a href="#fig1">1</a> foi utilizado o pacote <a href="#ggplot2">'ggplot2'</a>.</p>
+
+<p>Na tabela<a href="#1">1</a> usou-se o pacote  <a href="#knitr">'knitr'</a>.</p>
+
+<p>E o pacote <a href="#lattice">'lattice'</a> para a figura<a href="#fig2">2</a>.</p>
+
+<p>Os dados foram extraídos do site <font color="blue"><code class="knitr inline">http://www.inmet.gov.br/portal/index.php?r=estacoes/estacoesAutomaticas</code></font></p>
+</body>
+</html>
+
+<!--Referências
+    Para pegar a referência de pacotes do R usar citation("lnome do pacote")
+    e para citação do R usar citation()-->
+
+<h3>Referências</h3>
+<cite id="R">R Core Team. (2017). R: A Language and Environment for Statistical Computing. Vienna, Austria. Retrieved from <a href="https://www.r-project.org/">https://www.r-project.org/</a></cite>
+<br/>
+<br/>
+<cite id="lattice">Sarkar, Deepayan (2008) Lattice: Multivariate Data Visualization with R. Springer, New York. ISBN 978-0-387-75968-5</cite>
+<br/>
+<br/>
+<cite id="knitr">Yihui Xie (2017). knitr: A General-Purpose Package for Dynamic Report Generation in R. R package version 1.17.</cite>
+<br/>
+<br/>
+<cite id="ggplot2">H. Wickham. ggplot2: Elegant Graphics for Data Analysis. Springer-Verlag New York, 2009.</cite>

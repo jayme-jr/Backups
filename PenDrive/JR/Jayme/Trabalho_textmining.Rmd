@@ -1,0 +1,14 @@
+---
+title: "Tramalho_textmining"
+author: "Jayme Junior"
+output: pdf_document
+---
+
+Será baseado em dados coletados do tweeter (tema a definir, provavelmente
+taxi/uber).
+
+Período de um mês com prováveis repetições diárias do script para coleta
+de dados. Dentro deste script  ja terá a wordcloud e serão extraídas 
+palavras chaves para posteriormente serem comparadas.
+
+Dois scripts, uma para cada serviço (provavelmente)

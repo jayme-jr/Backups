@@ -1,0 +1,331 @@
+---
+title: "Trabalho de Inferência"
+author: "Rafael Morciani/GRR:20160217"
+date: '`r Sys.Date() `'
+output:
+  pdf_document: default
+subtitle: Modelo Espacial AutoRegressivo (SAR)
+header-includes: \usepackage[brazil]{babel}
+                 \usepackage{amsmath}
+                 \usepackage{float}
+                 \usepackage{bm}
+csl: ABNT_UFPR_2011.csl
+bibliography: refs.bib
+---
+
+#Resumo
+
+O modelo de regressão espacial SAR é um modelo estatístico que tem como objetivo medir a dependência espacial de uma variavél explicativa com uma variável a ser explicada e/ou a relação entre áreas com a mesma variável, como por exemplo: explicar a renda em relação ao grau de escolaridade; verificar se a renda em uma determinada área é relacionada com a renda de áreas vizinhas.
+O modelo é utilizado em espaços geográficos, não levando em consideração relevos (ele atua no plano), então ele mede a dependência e/ou relação no espaços.
+
+
+#Introdução
+
+O modelo consiste em mensurar o grau de dependência entre a variável dependente das variáveis independentes e/ou a relação de uma única variável em diferentes regiões. O modelo é utilizado em políticas públicas (saúde, econômia, escolaridade, etc), como por exemplo: Explicar o nível de escolaridade de uma determinada região pelo salário médio dos vizinhos desta região.
+O modelo é muito utilizado para planejamento, como por exemplo: prever a econômia de um local que ainda não possuem moradores com base na econômia das áreas vizinhas.
+
+Os dados utilizados na implementação do modelo serão obtidos a partir de simulações no R, após os dados serem simulados podemos montar as funções de log e verossimilhança. As derivadas destas funções são muito complexas, então a função escore não será cálculada, ao invés utilizaremos a função "optim" do R para maximizar a log-verossimilhança em função dos parâmetros $\mu,\rho,\sigma^2 \ e \ \beta's$ obtendo assim os estimadores de máxima verissimilhança do modelo ($\hat{\mu},\hat{\rho},\hat{\sigma^2} \ e \ \hat{\beta's}$).
+
+O modelo tem como objetivo medir a dependência/relação espacial, ou seja os valores de $\rho$, caso $\rho$ seja muito próximo de zero, nosso modelo de regressão se torna ou se aproxima de um modelo de regressão linear.
+
+\pagebreak
+
+#Modelo
+
+O modelo SAR Espacial consiste pelas equações:
+
+Y = $\rho$ $W$ Y + X $\beta$ + $\epsilon$, $\epsilon \sim N(0;\sigma^2I)$
+
+
+Onde: 
+
+Y:Variável dependente;
+
+$\rho$:Parâmetro espacial responsável por mensurar o grau de dependência espacial;
+
+$W$:Matriz de vizinhança;
+
+X: Vetor das variáveis independentes;
+
+$\beta$:Vetor dos coeficientes de regressão;
+
+$\epsilon$: Erro aleatório;
+
+$\sigma^2$:Variância do modelo;
+
+I: Matriz identidade.
+
+Suporte da distribuição: Y $\in \mathbb{R}$ 
+
+Espaço paramétrico: $\rho \in [-1;1],\ \sigma^2 \in\mathbb{R_+^*},\ \beta\in\mathbb{R},\ \mu\in\mathbb{R}$
+
+\pagebreak
+
+#Inferência
+
+Para a devida inferência do modelo SAR espacial precisamos encontrar os estimadores de cada um dos parâmetros ($\mu, \rho \ , \sigma^2 \ e \ \beta's$).
+
+A estimação de $\rho$ será realizada pela máxima verossimilhança da distribuição normal multivariada:
+
+Z $\sim$ $N_m$($\mu;\Sigma$)
+
+$\Sigma$ = $(I-\rho W)^{-1}\sigma^2I(I-{\rho W}')^{-1}$
+
+Assim ficamos com a seguinte expressão:
+
+$$f(y_i;\rho;\mu;\sigma^2) = (2\pi)^{\frac{-p}{2}}\left |\Sigma  \right |^{\frac{-1}{2}}e^{\frac{-1}{2}(y_i - \mu)\Sigma^{-1}{(y_i - \mu)}'}$$
+
+Onde p = Total de observações
+
+Como cada área possui somente uma observação (com vários dados) então n=1.
+E nossa função de verossimilhança fica igual a função distribuição.
+
+Para medir a compatibilidade do parâmetro com a amostra obtida, utilizaremos o método de máxima verossimilhança.
+
+*Verossimilhança*
+
+$$L(\rho;\mu;\sigma^2;y_i) = (2\pi)^{\frac{-p}{2}} \left | \Sigma \right |^{\frac{-1}{2}} e^{\frac{-1}{2}(y_i-\mu)\Sigma^{-1}{(y_i-\mu)}'}$$
+
+*log-verossimilhança*
+
+$$l(\rho;\mu;\sigma^2;y_i) = -\frac{1}{2} \left [ p\log(2\pi) + log(\left | \Sigma \right |) + (Y-\mu)\Sigma^{-1}{(Y-\mu)}' \right ]$$
+
+*Maximizando a função*
+
+Para maximizar a log-verossimilhança usaremos a função "optim", com ela conseguiremos os estimadores de todos os parâmetros do modelo ($\hat{\mu},\hat{\rho},\hat{\sigma^2} \ e \ \hat{\beta's}$).
+
+Após calculado os estimadores, verificamos que os mesmos são consistentes, não viciados e eficientes.
+
+Com os valores dos estimadores dos parâmetros, iremos criar um intervalo com 95% de confiança de conter o verdadeiro valor do parâmetro, realizaremos também um teste de hipótese (Wald) para saber o quão distante os estimadores estão dos valores observados.
+
+Teste Wald: $Z_n=\frac{\hat{\theta}-\theta}{\sqrt{V[\hat{\theta}]}} \sim N(0;1)$
+
+Se $Z_n > 1,96$ ou $Z_n<-1,96$ então, rejeita-se a hipótese de que $\rho = 0$
+
+\pagebreak
+
+#Implementação Computacional
+```{r, echo=FALSE, include=FALSE}
+# Criando a estrutura espacial
+# Lista de vizinhos
+require(spdep)
+require(mvtnorm)
+
+nb <- cell2nb(nrow = 10, ncol = 10)
+
+# Matriz de vizinhanca
+matriz = cell2nb(nrow=10,ncol=10,type="rook")
+W = nb2mat(matriz)
+
+#Definindo as variaveis
+Sigma <- function(rho, sigma2, W) {
+  I <- diag(rep(1,ncol(W)))
+  B <- rho*W
+  p1 <- solve( (I - B) )
+  p2 <- solve( (I - t(B)) )
+  out <- sigma2*(p1%*%p2)
+  return(out)
+}
+
+Sigma2 <- as.matrix(Sigma(rho = 0.5, sigma2 = 1, W = W))
+x1 <- seq(-1,1, l = 100)
+mu <- 2 + 3*x1
+Y <- as.numeric(rmvnorm(1, mean = mu, sigma = Sigma2))
+
+#Verossimilhanca
+L <- function(Sigma,Y) {
+  p <- length(Y)
+  out <- prod( ((2*pi)^(-p/2)) * (1/determinant(Sigma,logarithm=T)) * 
+                 exp((-1/2)*Y%*%solve(Sigma)%*%t(Y)) )
+  return(out)
+  }
+
+#Log-verossimilhanca
+lv <- function(par, W, Y, x1) {
+  beta0 <- par[1]
+  beta1 <- par[2]
+  rho <- par[3]
+  sigma2 <- par[4]
+  p <- length(Y)
+  Sigma2 <- as.matrix(Sigma(rho = rho, sigma2 = sigma2, W = W))
+  mu <- beta0 + beta1*x1
+  out <- dmvnorm(x = Y, mean = mu, sigma = Sigma2, log = TRUE)
+  return(as.numeric(out))
+}
+
+## Avaliando a log-Verossimilhança em um ponto
+lv(par = c(2, 3, 0.5, 1), W = W, Y = Y, x1 = x1)
+
+#Maximizando a log-verossimilhanca
+est <- optim(par = c(0,0, 0, 1), fn = lv, W = W, Y = Y, x1 = x1, 
+             method = "L-BFGS-B",
+             lower = c(-Inf, -Inf, -0.99, 0.0001), upper = c(Inf, Inf, 0.99, Inf),
+             control = list(fnscale = -1), hessian = T)
+
+#Estimativas obtidas
+Beta0_hat <- est$par[1]
+Beta1_hat <- est$par[2]
+rho_hat <- est$par[3]
+sigma2_hat <- est$par[4]
+
+#Matriz de informação observada
+I_o <- (-est$hessian)
+
+#Variâncias dos estimadores
+V <- sqrt(diag(solve(I_o)))
+
+#Teste de hipotese Wald
+#H0: rho = 0, H1: rho != 0
+rho_0 <- 0
+Zn <- (rho_hat - rho_0)/(V[3])
+
+#Intervalo com 95% de confiança
+inf <- rho_hat - (1.96*V[3])
+sup <- rho_hat + (1.96*V[3])
+IC <- c(inf,sup)
+```
+
+1. **Simulando os dados**
+
+```{r}
+# Criando a estrutura espacial
+# Lista de vizinhos
+nb <- cell2nb(nrow = 10, ncol = 10)
+
+# Matriz de vizinhanca
+matriz = cell2nb(nrow=10,ncol=10,type="rook")
+W = nb2mat(matriz)
+           
+#Demais variaveis
+Sigma <- function(rho, sigma2, W) {
+  I <- diag(rep(1,ncol(W)))
+  B <- rho*W
+  p1 <- solve( (I - B) )
+  p2 <- solve( (I - t(B)) )
+  out <- sigma2*(p1%*%p2)
+  return(out)
+}
+
+Sigma2 <- as.matrix(Sigma(rho = 0.5, sigma2 = 1, W = W))
+
+x1 <- seq(-1,1, l = 100)
+
+mu <- 2 + 3*x1
+
+Y <- as.numeric(rmvnorm(1, mean = mu, sigma = Sigma2))
+``` 
+\pagebreak
+
+2. **Função de Verossimilhança e Log-Verossimilhança**
+```{r}
+#Verossimilhanca
+L <- function(Sigma,Y) {
+  p <- length(Y)
+  out <- prod( ((2*pi)^(-p/2)) * (1/determinant(Sigma,logarithm=T)) * 
+                 exp((-1/2)*Y%*%solve(Sigma)%*%t(Y)) )
+  return(out)
+  }
+```
+Para melhor manipulação da função, passamos o logaritmo em ambos os lados da função, ficando com a função de log-verossimilhança.
+
+```{r}
+#Log-verossimilhanca
+lv <- function(par, W, Y, x1) {
+  beta0 <- par[1]
+  beta1 <- par[2]
+  rho <- par[3]
+  sigma2 <- par[4]
+  p <- length(Y)
+  Sigma2 <- as.matrix(Sigma(rho = rho, sigma2 = sigma2, W = W))
+  mu <- beta0 + beta1*x1
+  out <- dmvnorm(x = Y, mean = mu, sigma = Sigma2, log = TRUE)
+  return(as.numeric(out))
+}
+```
+3. **Maximizando a função Log-Verossimilhança pela função "optim"**
+
+Para utilização desta função, precisou definir o espaço paramétrico de cada estimados, para isso foi utilizado o método "L-BFGS-B".
+```{r}
+est <- optim(par = c(0,0, 0, 1), fn = lv, W = W, Y = Y, x1 = x1, 
+             method = "L-BFGS-B",
+             lower = c(-Inf, -Inf, -0.99, 0.0001), upper = c(Inf, Inf, 0.99, Inf),
+             control = list(fnscale = -1), hessian = T)
+```
+4. **Estimativas obtidas**
+```{r}
+Beta0_hat <- est$par[1]
+Beta0_hat
+Beta1_hat <- est$par[2]
+Beta1_hat
+rho_hat <- est$par[3]
+rho_hat
+sigma2_hat <- est$par[4]
+sigma2_hat
+```
+\pagebreak
+
+5. **Matriz de informação observada e as variâncias dos estimadores**
+
+A matriz de informação observada possiu na diagonal principal as variâncias de cada estimador e os demais valores são as covariâncias dos estimadores.
+```{r}
+#Matriz de informação observada
+I_o <- (-est$hessian)
+I_o
+V <- sqrt(diag(solve(I_o)))
+V
+```
+6. **Teste de hipótese e intervalo com 95% de confiança**
+
+Teste Wald:
+$H_0: \rho = 0,\ H_1: \rho \neq 0$
+```{R}
+rho_0 <- 0
+Zn <- (rho_hat - rho_0)/(V[3])
+Zn
+```
+Intervalo com 95% de confiança
+```{r}
+inf <- rho_hat - (1.96*V[3])
+sup <- rho_hat + (1.96*V[3])
+IC <- c(inf,sup)
+IC
+```
+\pagebreak
+
+#Discussão
+
+- Valores definidos para os estimadores:
+
+$\rho$ = 0.5
+
+$\sigma^2$ = 1
+
+$\beta_0$ = 2
+
+$\beta_1$ = 3
+
+- Estimativas obtidas:
+
+$\hat{\rho}$ = `r rho_hat `
+
+$\hat{\sigma^2}$ = `r sigma2_hat `
+
+$\hat{\beta_0}$ = `r Beta0_hat `
+
+$\hat{\beta_1}$ = `r Beta1_hat `
+
+- Teste Wald
+
+$H_0: \rho = 0$, $H_1: \rho \neq 0$
+
+$Z_n$ = `r Zn `
+
+Rejeita-se $H_0$
+
+- Intervalo com 95% de confiança para $\hat\rho$
+
+$IC_{95\%}$: [`r IC `]
+
+A inferência realizada no modelo SAR espacial utilizando o método de máxima verossimilhança a partir de simulações realizadas no R, se mostrou muito eficiente, conseguindo medir com precisão se existe ou não dependência espacial. Mesmo não realizando todos os cálculos analiticamente conseguimos boas estimativas.
+
+O grande desafio foi trabalhar com um modelo pouco conhecido e na simulação dos dados, mas uma vez que os dados foram gerados, e com a distribuição conhecida, foi possível realizar a devida inferência. A função "optim" também se mostrou efetiva no cálculo da maximização da função, retornando todas as estimativas necessárias para a realização do teste de hipótese e criação do intervalo de confiança.

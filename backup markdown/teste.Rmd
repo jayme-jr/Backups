@@ -1,0 +1,97 @@
+---
+title: "Teste"
+author: "Jayme Junior"
+date: "`r Sys.Date()`" 
+output:          
+  html_document:
+    highlight: "zenburn"  
+    number_sections: true 
+    toc: TRUE 
+    toc_float: TRUE
+    toc_depth: 2 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r echo=FALSE, message=FALSE}
+library(ggplot2)
+library(tidyverse)
+library(kableExtra)
+
+x <- c(1,2,3,4,5,6,7,8)
+y <- c(-1,-2,-3,4,-5,6,10,-8)
+dados <- data.frame(var1 = x, var2 = y)
+mvar1 <- mean(dados$var1)
+mvar2 <- mean(dados$var2)
+teste <- function(x){
+  if(x > 0){
+    out <- "tem média maior que zero"
+  }
+  else{
+    out <- "tem média menor que zero"
+  }
+  return(out)
+}
+tab <- kableExtra::kable(dados, format = "markdown")
+
+maiorx <- max(x)
+maiory <- max(y)
+
+if(maiory > maiorx){
+  resp <- paste0("Entre os dois vetores o y tem o maior valor = ", maiory)
+}else{
+  resp <- paste0("Entre os dois vetores o x tem o maior valor = ", maiorx)
+}
+```
+
+```{r echo=FALSE}
+z <- 32
+```
+
+
+A média de vendas no mês foi de `r z`.
+
+\center
+```{r echo=FALSE}
+tab
+```
+
+```{r echo=FALSE}
+plot(y ~ x)
+```
+
+Comparando os dois vetores: `r resp`
+
+```{r results='markup'}
+print("olá!")
+rnorm(10)
+```
+
+
+
+# Treino
+
+## R Markdown
+
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+### Não aparece no sumário
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

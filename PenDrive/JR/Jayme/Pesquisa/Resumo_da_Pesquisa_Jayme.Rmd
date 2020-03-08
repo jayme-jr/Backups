@@ -1,0 +1,41 @@
+---
+title: "Resumo Da Pesquisa"
+author: "Jayme Junior"
+output: pdf_document
+---
+
+# ESTATÍSTICA APLICADA À GEOPOLÍTICA – ANÁLISE DO IMPACTO SOCIOECONÔMICO DE SERVIÇOS INOVADORES QUE COMPETEM COM CARTÉIS OU MONOPÓLIOS
+
+Com base na teoria da *Terceira Revolução Industrial* de Rifkin. Que 
+trata do processo de mudança do paradigma econômico para uma economia 
+que baseia sua comunicação na internet e seu combustível em fontes 
+renováveis e limpas, chamada pelo autor de *economia compartilhada*.
+
+No atual paradigma capitalista, o custo de produção é reduzido ao máximo 
+para obter maior lucro, em contrapartida, no modelo que se constrói na 
+Toria de Rifkin, uma série de produtos e serviços terão seu custo de
+produção tão reduzido que serão ofertados quase ou gratuitamente.
+
+Para os transportes temos um serviço que vai contra esta lógica atual, o
+"Uber", um aplicativo para pedir carros com motoristas, que funciona de 
+maneira similar ao táxi. Pela sua natureza esse serviço tende a ser 
+oferecido com menor preço do que o seu similar.
+
+Esse trabalho tem por objetivo avaliar o impacto socioeconômico 
+ocasionado pelo aumento da utilização desse novo serviço que vai ao 
+encontro do pensamento de Rifkin, uma vez que o seu custo de operação é 
+reduzido tendendo para a gratuidade e o seu meio de comunicação é 
+totalmente eletrônico e em rede como é preconizado na visão da 
+*Terceira Revolução Industrial*.
+
+Utiliza-se cada vez com maior frequência e em vários setores da economia
+brasileira, serviços com essas características como o Netflix, o Spotfy, 
+o Airbnb, entre outros.
+
+Como método de trabalho será utilizado a “mineração de texto” que é uma 
+técnica que consiste fundamentalmente do uso de ferramental estatístico 
+para a extração de informações textuais. Espera-se com essa pesquisa 
+obter achados que ratifiquem a evolução da organização social de forma 
+aproximada ao que preconiza Rifkin.
+
+

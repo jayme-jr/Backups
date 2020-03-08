@@ -1,0 +1,84 @@
+\documentclass[a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+
+\usepackage{geometry}
+\geometry{a4paper, left=40mm, right=40mm, top=25mm, bottom=25mm}
+
+% Cores: http://latexcolor.com/.
+\usepackage{xcolor}
+\definecolor{utahcrimson}{rgb}{0.83, 0.0, 0.25}
+\newcommand{\tc}[1]{\textcolor{utahcrimson}{#1}}
+
+\usepackage{hyperref}
+\hypersetup{colorlinks = true}
+
+\title{Análise do Clima em Curitiba para o período AAA a BBB}
+\author{Acadêmico HHH}
+\date{20 de março de 2018}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+\maketitle
+
+Use a construção \verb|\tc{|\verb|\|\verb|Sexpr{<cmd>}}| para destacar o uso dos
+recursos do Sweave/Knitr.
+
+<<>>=
+so <- Sys.info()["sysname"]
+if (so == "Linux") {
+    frase <- "A propósito, parabéns por usar Linux"
+} else {
+    frase <- sprintf("Como assim você usa %s? Use Linux", so)
+}
+@
+
+Esse relatório foi feito no \tc{\Sexpr{so}}. \tc{\Sexpr{frase}}.
+
+<<>>=
+# Sobre detalhes de como formatar datas.
+
+x <- "20/03/2018 22:00:00"
+
+dt <- as.POSIXct(x = x, format = "%d/%m/%Y %H:%M:%S")
+dt
+
+# Extração de partes da estampa.
+strftime(dt, format = "%A") # Dia da semana.
+strftime(dt, format = "%a") # Dia da semana abreviado.
+strftime(dt, format = "%w") # Número do dia da semana (Seg = 1).
+strftime(dt, format = "%B") # Nome do mês.
+strftime(dt, format = "%b") # Nome do mês abreviado.
+strftime(dt, format = "%m") # Número do mês.
+strftime(dt, format = "%d") # Dia do mês.
+strftime(dt, format = "%j") # Dia do ano, de 1 até 365/366.
+strftime(dt, format = "%Y") # Ano.
+strftime(dt, format = "%y") # Ano só a dezena.
+strftime(dt, format = "%H") # Hora.
+strftime(dt, format = "%M") # Minuto.
+strftime(dt, format = "%S") # Segundo.
+
+agora <- as.POSIXct(Sys.time())
+falta <- dt - agora
+
+nd <- as.numeric(falta, units = "days")
+if (nd > 2) {
+    prazo <- sprintf(
+        "Faltam %d dias e %0.1f horas para entregar o trabalho",
+        nd %/% 1,
+        (nd %% 1) * 24)
+} else if (nd > 1) {
+    prazo <- sprintf(
+        "Faltam 1 dia e %0.1f horas para entregar o trabalho",
+        (nd %% 1) * 24)
+} else {
+    prazo <- sprintf(
+        "Falta %0.1f horas para entregar o trabalho",
+        nd * 24)
+}
+@
+
+\tc{\Sexpr{prazo}}.
+
+\end{document}

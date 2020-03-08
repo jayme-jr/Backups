@@ -1,0 +1,131 @@
+<html>
+
+<head>
+<title>Sabatina_Clima_RHTML</title>
+<meta charset="utf-8"></meta>
+</head>
+
+<body>
+
+<!--begin.rcode, echo=FALSE, results='hide'
+# Deve usar '' nos parâmetros dos chunks
+library("kableExtra")
+library("magrittr")
+library(knitr)
+library(xtable)
+library("ggplot2") 
+library("lattice")
+dados <- read.csv("dados.csv")
+per_in <- dados[["data"]][1]# data inicial do período
+q <- length(dados$data)
+per_fin <- dados[["data"]][q]# data final do período
+per_in
+per_fin
+per_dias <- length(levels(dados$data))#tamanho em dias do período
+horas <- length(dados$hora)
+prec_lim <- trunc(max(dados$precipitacao))#maior precipitação do período sem casas decimais
+url <- "http://www.inmet.gov.br/portal/index.php?r=estacoes/estacoesAutomaticas"
+u <- max(dados$precipitacao)
+v <- dados$data[dados$precipitacao == u]
+v
+if(u > 0){
+  prec <- sprintf("O dia com maior precipitação no período foi %s com precipitação de %0.1fmm", v, u )
+}else{
+  prec <- sprintf("Não houve precipitação no período")
+  }
+#knit("Sabatina_clima_html.Rhtml")
+end.rcode-->
+
+<h1>Análise do Clima em Colombo para o período <!--rinline per_in--> a <!--rinline per_fin--></h1>
+<p align="right"><font size="-1">Acadêmico Jayme Gomes dos Santos Junior</font></p>
+
+<p>Este relatório utiliza os dados climáticos da cidade de Colombo no período de <font color="blue"<!--rinline per_dias--></font> dias compreendidos entre <font color="blue"<!--rinline per_in--></font> e <font color="blue"<!--rinline per_fin--></font>. <font color="blue"<!--rinline prec--></font><!--, como mostra a primeira figura "citar a primeira figura"--></p>
+<!--Na hora de mudar a cor das respostar por objetos R com <font>, se usado: 
+<font...códigoR></font> aparece parecido com a versão sweave, já se usar da forma comum:
+>font...>códigoR</font> sai com uma fonte muito menor-->
+<figure id="fig1", align="center">
+<!--begin.rcode , fig.width=6, fig.height=4, echo=FALSE
+plot(dados$precipitacao, xlab = "Horas", ylab = "Precipitação em mm",
+     yaxp = trunc(c(0, prec_lim, 5)), xaxp = c(0, horas, horas/24),
+     las = 1, type = "l", lwd = 3, col = "darkblue", cex = 2)
+end.rcode-->
+  <figcaption>Figura1: Precipitação registrada a cada hora em Colombo.</figcaption>
+</figure>
+
+<!--begin.rcode echo=FALSE
+df <- dados[, -c(1, 3, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
+                17, 18, 19, 20)]
+
+i <- 1
+temp_m <- c()
+temp_min <- c()
+temp_max <- c()
+
+while(i <= length(levels(df$data))){
+  x <- levels(df$data)[i]
+  temp_m[i] <- mean(df$temp_inst[df$data == x])
+  temp_min[i] <- min(df$temp_min[df$data == x])
+  temp_max[i] <- max(df$temp_max[df$data == x])
+  i <- i+1
+}
+
+df2 <- data.frame("Data" = levels(dados$data), "Temperatura Média" = temp_m,
+                  "Temperatura Máxima" = temp_max, "Temperatura Mínima" = temp_min)
+knitr:::kable(df2, "html", caption = "Tabela1: Tabela da temperatura média, máxima e mínima de cada dia do período", align = "c", table.attr = "id=\"1\"") %>% 
+  kable_styling(bootstrap_options = c("striped", "hover"))
+  
+#O comando %>% do magrittr, pipe,  permite adicionar camadas a algumas funções como kable, ggplot2, etc
+
+tm <- max(df2$Temperatura.Média)#temperatura média mais alta
+d1 <- df2$Data[df2$Temperatura.Média == tm]#dia que ocorreu a temperatura média mais alta
+ta <- max(df2$Temperatura.Máxima)#temperatura mais alta
+d2 <- df2$Data[df2$Temperatura.Máxima == ta]#dia que ocorreu a temperatura mais alta
+tb <- min(df2$Temperatura.Mínima)#temperatura mais baixa
+d3 <- df2$Data[df2$Temperatura.Mínima == tb]#dia que ocorreu a temperatura mais baixa
+end.rcode-->
+
+
+<!--usar trunc() no objeto tm para não mostrar casas decimais-->
+<p><font color="blue"<!--rinline d1--></font> foi o dia com a temperatura média mais alta, <font color="blue"<!--rinline trunc(tm)--></font>°C. Já a temperatura mais baixa de todo o período foi <font color="blue"<!--rinline tb--></font>°C no dia <font color="blue"<!--rinline d3--></font> e a mais alta ocorreu no dia <font color="blue"<!--rinline d2--></font> alcançando <font color="blue"<!--rinline ta--></font>°C.
+</p>
+
+<figure id="fig2", align="center">
+<!--begin.rcode echo=FALSE
+lattice:::xyplot(temp_inst ~ precipitacao | data, data = dados, between = list(y = 1),
+                 scale = list(alternating = FALSE), col = "red", las = 1, cex = 2,
+                 xlab = "Precipitação em mm", ylab = "Temperatura em °C")
+end.rcode-->
+  <figcaption>Relação entre a temperatura e precipitação a cada dia.</figcaption>
+</figure>
+
+
+<!--Para referência interna, usamos <a href="#id do que será referenciado>texto do hiperlink</a>-->
+<p>Já na figura<a href="#fig2">2</a> vemos a relação entre a temperatura e a precipitação em cada dia do período.</p>
+
+<p>Todo o relatório foi feito utilizando o <a href="#R">R</a>.</p>
+
+<p>Na figura<a href="#fig1">1</a> foi utilizado o pacote <a href="#ggplot2">'ggplot2'</a>.</p>
+
+<p>Na tabela<a href="#1">1</a> usou-se o pacote  <a href="#knitr">'knitr'</a>.</p>
+
+<p>E o pacote <a href="#lattice">'lattice'</a> para a figura<a href="#fig2">2</a>.</p>
+
+<p>Os dados foram extraídos do site <font color="blue"><!--rinline url--></font></p>
+</body>
+</html>
+
+<!--Referências
+    Para pegar a referência de pacotes do R usar citation("lnome do pacote")
+    e para citação do R usar citation()-->
+
+<h3>Referências</h3>
+<cite id="R">R Core Team. (2017). R: A Language and Environment for Statistical Computing. Vienna, Austria. Retrieved from <a href="https://www.r-project.org/">https://www.r-project.org/</a></cite>
+<br/>
+<br/>
+<cite id="lattice">Sarkar, Deepayan (2008) Lattice: Multivariate Data Visualization with R. Springer, New York. ISBN 978-0-387-75968-5</cite>
+<br/>
+<br/>
+<cite id="knitr">Yihui Xie (2017). knitr: A General-Purpose Package for Dynamic Report Generation in R. R package version 1.17.</cite>
+<br/>
+<br/>
+<cite id="ggplot2">H. Wickham. ggplot2: Elegant Graphics for Data Analysis. Springer-Verlag New York, 2009.</cite>

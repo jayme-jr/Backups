@@ -1,0 +1,123 @@
+rm(list=ls())
+setwd("C:/Users/l04211/Desktop/Biometria")
+
+library("drc")      # drm
+require("nlstools") # confint2
+
+data1 <- read.csv("Grupo_1.csv", sep = ";", dec = ",")
+
+# Modelos
+# Log-Logistico 5 parametros
+fit0 <- drm(Resposta ~ Dose, Grupo, data = data1, fct = LL.5(), type = "continuous")
+summary(fit0)
+
+confint(fit0) # Mesma inclinacao (B)
+              # Mesmo C
+              # D Diferentes
+              # Mesma ED50 (E)
+              # Mesmo F
+
+fit0.1 <- drm(Resposta ~ Dose, Grupo, data = data1, fct = LL.5(), type = "continuous",
+              pmodels=list(~1, ~1, ~Grupo-1, ~1, ~1))
+summary(fit0.1)
+
+# Log-Logistico 4 parametros
+fit1 <- drm(Resposta ~ Dose, Grupo, data = data1, fct = LL.4(), type = "continuous")
+summary(fit1)
+
+confint(fit1) # Mesmo B, C, E. Diferem os D
+fit1.1 <- drm(Resposta ~ Dose, Grupo, data = data1, fct = LL.4(), type = "continuous",
+              pmodels=list(~1, ~1, ~Grupo-1, ~1))
+summary(fit1.1)
+
+# Weibull 4 parametros
+fit2 <- drm(Resposta ~ Dose, Grupo, data = data1, fct = W1.4(), type = "continuous")
+plot(fit2)
+summary(fit2)
+
+confint(fit2) # Mesmo B, E
+fit2.1 <- drm(Resposta ~ Dose, Grupo, data = data1, fct = W1.4(), type = "continuous",
+            pmodels=list(~1, ~Grupo-1, ~Grupo-1, ~1))
+summary(fit2.1)
+
+# Comparando os modelos
+comp_modelos <- data.frame("AIC" = c(AIC(fit0.1), AIC(fit1.1), AIC(fit2.1)),
+                           "BIC" = c(BIC(fit0.1), BIC(fit1.1), BIC(fit2.1)),
+                           "logLik" = (c(logLik(fit0.1), logLik(fit1.1), logLik(fit2.1))))
+row.names(comp_modelos) <- c("LL.5", "LL.4", "W1.4")
+comp_modelos # Modelo LL.5 ou LL.4
+
+anova(fit0.1, fit1.1) # LL.4 pois mais parciomonioso
+
+
+# Curvas Dose-Resposta por grupo
+par(mfrow = c(2,2))
+plot(fit0.1, main = "LL.5")
+plot(fit1.1, main = "LL.4")
+plot(fit2.1, main = "W1.4")
+
+# Equacao e interpretacao dos modelos
+# https://docs.ufpr.br/~taconeli/CE06219/Aula3.pdf
+# Slide 19
+# Estimativas pontuais e EP
+summary(fit0.1)
+summary(fit1.1)
+summary(fit2.1)
+
+# IC 95%
+confint2(fit0.1, level = 0.95)
+confint2(fit1.1, level = 0.95)
+confint2(fit2.1, level = 0.95)
+
+# Analise Residual
+par(mfrow = c(1,2))
+
+res0.1 <- residuals(fit0.1, typeRes = 'standardised')
+plot(res0.1 ~ fitted(fit0.1), cex = 1.2, pch = 20, main = "Residuos LL.5");abline(h = 0, col = 2, lty = 2)
+qqnorm(res0.1, pch = 20, cex = 1.2);qqline(res0.1)
+
+res1.1 <- residuals(fit0.1, typeRes = 'standardised')
+plot(res1.1 ~ fitted(fit1.1), cex = 1.2, pch = 20, main = "Residuos LL.4");abline(h = 0, col = 2, lty = 2)
+qqnorm(res1.1, pch = 20, cex = 1.2);qqline(res1.1)
+
+res2.1 <- residuals(fit2.1, typeRes = 'standardised')
+plot(res2.1 ~ fitted(fit2.1), cex = 1.2, pch = 20, main = "Residuos W1.4");abline(h = 0, col = 2, lty = 2)
+qqnorm(res2.1, pch = 20, cex = 1.2);qqline(res2.1)
+
+# Teste de falta de ajuste
+modelFit(fit0.1)
+modelFit(fit1.1)
+modelFit(fit2.1)
+
+# Predicao 3 doses
+new.data <- data.frame("Grupo" = c(rep("a",3), rep("b",3)),
+                       "Dose" = rep(c(3, 5, 15),2))
+
+pred <- cbind(predict(fit0.1, newdata = new.data, interval = 'prediction'),
+              predict(fit1.1, newdata = new.data, interval = 'prediction'),
+              predict(fit2.1, newdata = new.data, interval = 'prediction'))
+colnames(pred)[c(1,4,7)] <- c("Pred. LL.5", "Pred. LL.4", "Pred. W1.4")
+rownames(pred) <- c("A-3","A-5", "A-15", "B-3", "B-5", "B-15")
+pred
+
+# ED50
+ED(fit0.1, c(25,50,75), interval = "delta")
+ED(fit1.1, c(25,50,75), interval = "delta")
+ED(fit2.1, c(25,50,75), interval = "delta")
+
+# Potencias relativas
+EDcomp(fit0.1, percVec = c(50,50)) ### PR(50)
+EDcomp(fit0.1, percVec = c(90,90)) ### PR(90)
+
+EDcomp(fit0, percVec = c(50,50)) ### PR(50)
+EDcomp(fit0, percVec = c(90,90)) ### PR(90)
+
+EDcomp(fit2.1, percVec = c(50,50)) ### PR(50)
+EDcomp(fit2.1, percVec = c(90,90)) ### PR(90)
+### O fato da inclinacao relativa ser a mesma para as curvas implica
+### que a potencia relativa e a mesma, para qualquer ED.
+
+
+
+
+

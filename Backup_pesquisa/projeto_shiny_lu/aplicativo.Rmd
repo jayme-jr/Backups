@@ -1,0 +1,170 @@
+---
+title: "Nome do Aplicativo"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: scroll
+    navbar:
+      - { title: "PET", href: "https://pet-estatistica.github.io/site/", icon: fa-github,
+       align: right }
+  runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(shiny)
+
+df <- data.frame(MinVals = numeric(), MaxVals = numeric())
+
+```
+
+HOME
+=====================================
+
+Inputs {.sidebar}
+-------------------------------------
+
+```{r}
+
+tags$h3("Test It")
+
+sliderInput("data1",
+             label = "Some data",
+             value = 50,
+             min = 0,
+             max = 100,
+             step = 5,
+             width = 200)
+
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r}
+
+#df[1, 1] <- reactive({input$data1})  # does not work
+
+y <- reactive({input$data1}) # this works
+
+renderValueBox({
+    x <- y()
+  valueBox(
+    value = x,
+    icon = "fa-area-chart",
+    color = "orange")
+})
+
+```
+
+Tecido 1
+=====================================
+
+Inputs {.sidebar}
+-------------------------------------
+
+```{r}
+# shiny inputs defined here
+# opççoes do usuário
+textInput("tecido1", "Nome do Tecido", placeholder = "Ex: Fígado")
+
+numericInput("temp1", "Tempos de Coleta em Horas", NULL)
+
+
+numericInput("rpt1", "Número de Animais por Tempo de Coleta", 
+             1, min = 1)
+
+```
+
+Row 
+-------------------------------------
+
+### Dados
+
+```{r}
+# Cria a tabela com as entradas do usuário
+function(input, output, session){
+  observeEvent(input$temp1, {
+    x <- input$temp1
+    updateNumericInput(session, "temp1", value = x)})
+  
+}
+```
+
+Row 
+-------------------------------------
+
+### Gráfico
+
+### Tabela Resposta
+
+Tecido 2
+=====================================
+
+Inputs {.sidebar}
+-------------------------------------
+
+```{r}
+# shiny inputs defined here
+# opççoes do usuário
+```
+
+Row 
+-------------------------------------
+
+### Dados
+
+Row 
+-------------------------------------
+
+### Gráfico
+
+### Tabela Resposta
+
+Tecido 3
+=====================================
+
+Inputs {.sidebar}
+-------------------------------------
+
+```{r}
+# shiny inputs defined here
+# opççoes do usuário
+```
+
+Row 
+-------------------------------------
+
+### Dados
+
+Row 
+-------------------------------------
+
+### Gráfico
+
+### Tabela Resposta
+
+Tecido 4
+=====================================
+
+Inputs {.sidebar}
+-------------------------------------
+
+```{r}
+# shiny inputs defined here
+# opççoes do usuário
+```
+
+Row 
+-------------------------------------
+
+### Dados
+
+Row 
+-------------------------------------
+
+### Gráfico
+
+### Tabela Resposta

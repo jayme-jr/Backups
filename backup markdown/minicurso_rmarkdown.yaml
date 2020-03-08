@@ -1,0 +1,7 @@
+name: "Minicurso RMarkdown"
+image: "../img/projects/rmd.png"
+url: ../minicurso_rmarkdown_2019/
+description: >
+ <p align="justify">O minicurso tem por objetivo oferecer aulas para alunos 
+ de diversos cursos com interesse de aprender RMarkdown, apresentando conceitos 
+ básicos da linguagem, criação de documentos dinâmicos, relatórios e apresentações.</p>

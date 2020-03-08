@@ -1,0 +1,784 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={Trabalho de Métodos de Amostragem},
+            pdfauthor={Jayme Gomes dos Santos Junior},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{longtable,booktabs}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{5}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\newcommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{Trabalho de Métodos de Amostragem}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+    \author{Jayme Gomes dos Santos Junior}
+    \preauthor{\centering\large\emph}
+  \postauthor{\par}
+      \predate{\centering\large\emph}
+  \postdate{\par}
+    \date{Curitiba 2018}
+
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage[table]{xcolor}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+
+\usepackage[brazil]{babel}
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{3}
+\tableofcontents
+}
+\newpage
+
+\section{Trabalho 1}\label{trabalho-1}
+
+\subsection{Teorema 1}\label{teorema-1}
+
+Tendo uma população de tamanho \textbf{N}, ao extrair uma amostra de
+tamanho \textbf{n}, temos que o estimador não viezado para
+\(\overline{Y}\) é: \[
+\overline{y} = \sum_{i=1}^n\dfrac{y_i}{n}
+\]
+
+\subsection{Exercício 1}\label{exercicio-1}
+
+\begin{longtable}[]{@{}cl@{}}
+\caption{População de Tamanho N = 6}\tabularnewline
+\toprule
+População & Valores\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+População & Valores\tabularnewline
+\midrule
+\endhead
+y1 & 2\tabularnewline
+y2 & 4\tabularnewline
+y3 & 5\tabularnewline
+y4 & 7\tabularnewline
+y5 & 8\tabularnewline
+y6 & 9\tabularnewline
+\bottomrule
+\end{longtable}
+
+Com base na população dada na tabela 1, encontrar a média de todas as
+combinações possíveis de amostras de tamanhos: n = 2, n = 3 e n = 4.
+
+\subsubsection{Resolução}\label{resolucao}
+
+Sabendo que a média populacional é dada por:
+
+\[
+\overline{Y} = \sum_{i=1}^N\dfrac{y_i}{N} = \dfrac{2+4+5+7+8+9}{6} = 5.83
+\] O objetivo é mostrar que a média de todas as combinações de amostras
+possíveis terão o mesmo valor da média populacional.
+
+\emph{OBS:} ys = médias amostrais, P(ys) = probabilidade de cada amostra
+acontecer e ys.P(ys) = média amostral multiplicada pela sua
+probabilidade e a média amostral é calculada através do cálculo
+
+\[
+\sum_{i=1}^nys_i.P(ys_i)
+\]
+
+\paragraph{Para n = 2, temos:}\label{para-n-2-temos}
+
+A quantidade de amostras possíveis de tamanho 2 = \({6\choose 2}\) = 15.
+
+\newpage
+
+\begin{longtable}[]{@{}clcc@{}}
+\caption{Amostras Possíveis com n = 2}\tabularnewline
+\toprule
+Amostra & ys & P(ys) & ys.P(ys)\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+Amostra & ys & P(ys) & ys.P(ys)\tabularnewline
+\midrule
+\endhead
+2,4 & 3 & 1/15 & 0.2\tabularnewline
+2,5 & 3.5 & 1/15 & 0.23\tabularnewline
+2,7 & 4.5 & 1/15 & 0.3\tabularnewline
+2,8 & 5 & 1/15 & 0.33\tabularnewline
+2,9 & 5.5 & 1/15 & 0.37\tabularnewline
+4,5 & 4.5 & 1/15 & 0.3\tabularnewline
+4,7 & 5.5 & 1/15 & 0.37\tabularnewline
+4,8 & 6 & 1/15 & 0.4\tabularnewline
+4,9 & 6.5 & 1/15 & 0.43\tabularnewline
+5,7 & 6 & 1/15 & 0.4\tabularnewline
+5,8 & 6.5 & 1/15 & 0.43\tabularnewline
+5,9 & 7 & 1/15 & 0.47\tabularnewline
+7,8 & 7.5 & 1/15 & 0.5\tabularnewline
+7,9 & 8 & 1/15 & 0.53\tabularnewline
+8,9 & 8.5 & 1/15 & 0.57\tabularnewline
+\bottomrule
+\end{longtable}
+
+Comparando a média amostral com n = 2: 5.83 e populacional: 5.83, temos
+que são iguai.
+
+\paragraph{Para n = 3, temos:}\label{para-n-3-temos}
+
+A quantidade de amostras possíveis de tamanho 2 = \({6\choose 3}\) = 20.
+
+\begin{longtable}[]{@{}clcc@{}}
+\caption{Amostras Possíveis com n = 3}\tabularnewline
+\toprule
+Amostra & ys & P(ys) & ys.P(ys)\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+Amostra & ys & P(ys) & ys.P(ys)\tabularnewline
+\midrule
+\endhead
+2,4,5 & 3.67 & 1/20 & 0.18\tabularnewline
+2,4,7 & 4.33 & 1/20 & 0.22\tabularnewline
+2,4,8 & 4.67 & 1/20 & 0.23\tabularnewline
+2,4,9 & 5 & 1/20 & 0.25\tabularnewline
+2,5,7 & 4.67 & 1/20 & 0.23\tabularnewline
+2,5,8 & 5 & 1/20 & 0.25\tabularnewline
+2,5,9 & 5.33 & 1/20 & 0.27\tabularnewline
+2,7,8 & 5.67 & 1/20 & 0.28\tabularnewline
+2,7,9 & 6 & 1/20 & 0.3\tabularnewline
+2,8,9 & 6.33 & 1/20 & 0.32\tabularnewline
+4,5,7 & 5.33 & 1/20 & 0.27\tabularnewline
+4,5,8 & 5.67 & 1/20 & 0.28\tabularnewline
+4,5,9 & 6 & 1/20 & 0.3\tabularnewline
+4,7,8 & 6.33 & 1/20 & 0.32\tabularnewline
+4,7,9 & 6.67 & 1/20 & 0.33\tabularnewline
+4,8,9 & 7 & 1/20 & 0.35\tabularnewline
+5,7,8 & 6.67 & 1/20 & 0.33\tabularnewline
+5,7,9 & 7 & 1/20 & 0.35\tabularnewline
+5,8,9 & 7.33 & 1/20 & 0.37\tabularnewline
+7,8,9 & 8 & 1/20 & 0.4\tabularnewline
+\bottomrule
+\end{longtable}
+
+Comparando a média amostral com n = 3: 5.83 e populacional: 5.83, temos
+que são iguai.
+
+\paragraph{Para n = 4, temos:}\label{para-n-4-temos}
+
+A quantidade de amostras possíveis de tamanho 4 = \({6\choose 4}\) = 15.
+
+\begin{longtable}[]{@{}clcc@{}}
+\caption{Amostras Possíveis com n = 4}\tabularnewline
+\toprule
+Amostra & ys & P(ys) & ys.P(ys)\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+Amostra & ys & P(ys) & ys.P(ys)\tabularnewline
+\midrule
+\endhead
+2,4,5,7 & 4.5 & 1/15 & 0.3\tabularnewline
+2,4,5,8 & 4.75 & 1/15 & 0.32\tabularnewline
+2,4,5,9 & 5 & 1/15 & 0.33\tabularnewline
+2,4,7,8 & 5.25 & 1/15 & 0.35\tabularnewline
+2,4,7,9 & 5.5 & 1/15 & 0.37\tabularnewline
+2,4,8,9 & 5.75 & 1/15 & 0.38\tabularnewline
+2,5,7,8 & 5.5 & 1/15 & 0.37\tabularnewline
+2,5,7,9 & 5.75 & 1/15 & 0.38\tabularnewline
+2,5,8,9 & 6 & 1/15 & 0.4\tabularnewline
+2,7,8,9 & 6.5 & 1/15 & 0.43\tabularnewline
+4,5,7,8 & 6 & 1/15 & 0.4\tabularnewline
+4,5,7,9 & 6.25 & 1/15 & 0.42\tabularnewline
+4,5,8,9 & 6.5 & 1/15 & 0.43\tabularnewline
+4,7,8,9 & 7 & 1/15 & 0.47\tabularnewline
+5,7,8,9 & 7.25 & 1/15 & 0.48\tabularnewline
+\bottomrule
+\end{longtable}
+
+Comparando a média amostral com n = 4: 5.83 e populacional: 5.83, temos
+que são iguai.
+
+\section{Trabalho 2}\label{trabalho-2}
+
+\subsection{Teorema 2}\label{teorema-2}
+
+Seja \textbf{Y} a variável de interesse e \textbf{N} o tamanho da
+população, considere uma amostra de tamanho \textbf{n} extraída pelo
+processo de amostragem aleatória. A variãncia da média amostral será
+dada por:
+
+\[
+V[\overline{y}]=E[(\overline{y}-\overline{Y})^2]=\bigg[ \dfrac{N-n}{N}\bigg] \dfrac{S^2}{n}
+\] ou
+
+\[
+V[\overline{y}]=\sum_{i=1}^n(\overline{y_i}-\overline{Y})^2p(ys)_i
+\]
+
+\subsection{Exercício 2}\label{exercicio-2}
+
+Usando a população do Exerecício 1, calcular a variância da média
+amostral pelas duas formas para amostras n = 2, n = 3 e n = 4 com o
+objetivo de mostrar que os resultados são os mesmos usando as duas
+maneiras para cada tamanho de amostra.
+
+Considerando a tabela 1, temos que:
+
+\[
+S^2=\sum_{i=1}^N\dfrac{(y_i-\overline{Y})^2}{N-1}=\dfrac{(2-5.83)^2}{6-1}+...+\dfrac{(9-5.83)^2}{6-1}\cong6.967
+\]
+
+\subsubsection{Resolução}\label{resolucao-1}
+
+\paragraph{Para n = 2:}\label{para-n-2}
+
+\textbf{1ª Forma:} \[
+V[\overline{y}]=\bigg[\dfrac{N-n}{N}\bigg] \dfrac{S^2}{n}=\bigg[\dfrac{6-2}{6}\bigg]\dfrac{6.967}{2}\cong2.32
+\]
+
+\textbf{2ª Forma:} \[
+V[\overline{y}]=\sum_{i=1}^n(\overline{y_i}-\overline{Y})^2p(ys)_i=\dfrac{(3-5.83)^2}{6-1}\dfrac{1}{15}+\dfrac{(3.5-5.83)^2}{6-1}\dfrac{1}{15}+...+\dfrac{(8.5-5,83)^2}{6-1}\dfrac{1}{15}\cong2.32
+\]
+
+\paragraph{Para n = 3:}\label{para-n-3}
+
+\textbf{1ª Forma:} \[
+V[\overline{y}]=\bigg[\dfrac{N-n}{N}\bigg] \dfrac{S^2}{n}=\bigg[\dfrac{6-3}{6}\bigg]\dfrac{6.967}{3}\cong1.16
+\]
+
+\textbf{2ª Forma:} \[
+V[\overline{y}]=\sum_{i=1}^n(\overline{y_i}-\overline{Y})^2p(ys)_i=\dfrac{(3.67-5.83)^2}{6-1}\dfrac{1}{20}+\dfrac{(4.33-5.83)^2}{6-1}\dfrac{1}{20}+...+\dfrac{(8-5,83)^2}{6-1}\dfrac{1}{10}\cong1.16
+\]
+
+\paragraph{Para n = 4:}\label{para-n-4}
+
+\textbf{1ª Forma:} \[
+V[\overline{y}]=\bigg[\dfrac{N-n}{N}\bigg] \dfrac{S^2}{n}=\bigg[\dfrac{6-4}{6}\bigg]\dfrac{6.967}{4}\cong0.58
+\]
+
+\textbf{2ª Forma:} \[
+V[\overline{y}]=\sum_{i=1}^n(\overline{y_i}-\overline{Y})^2p(ys)_i=\dfrac{(4.5-5.83)^2}{6-1}\dfrac{1}{15}+\dfrac{(4.75-5.83)^2}{6-1}\dfrac{1}{15}+...+\dfrac{(7.25-5,83)^2}{6-1}\dfrac{1}{15}\cong0.58
+\]
+
+Logo, está demonstrado que as duas formas de cálculo de variância geram
+o mesmo resultado e que quanto mais aumenta o tamanho da amostra, mais
+diminui a variãncia, como esperado.
+
+\section{Trabalho 3}\label{trabalho-3}
+
+\subsection{Teorema 3}\label{teorema-3}
+
+Variânriãncia amostral é um estimador não viezado para a variância
+populacional.
+
+\[
+E[s^2]=\sum_{i=1}^ns^2P(ys_i)=S^2
+\]
+
+Onde:
+
+\[
+s^2=\dfrac{(a_1-ys)^2+...+(a_n-ys)^2}{n-1}
+\]
+
+Sendo \(a_1, ..., a_n\) cada observação da amostra.
+
+\subsection{Exercício 3}\label{exercicio-3}
+
+Provar o teorema 3 utilizando as informações dos exercícios anteriores.
+Sabemos pelo exercício 2 que: \(S^2=6,967\).
+
+\subsubsection{Resolução}\label{resolucao-2}
+
+\textbf{n = 2:}
+
+\begin{longtable}[]{@{}cll@{}}
+\caption{Variãncia amostral para n = 2}\tabularnewline
+\toprule
+Amostra & s² & s²P(ys)\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+Amostra & s² & s²P(ys)\tabularnewline
+\midrule
+\endhead
+2,4 & 2 & 0.13\tabularnewline
+2,5 & 4.5 & 0.3\tabularnewline
+2,7 & 12.5 & 0.83\tabularnewline
+2,8 & 18 & 1.2\tabularnewline
+2,9 & 24.5 & 1.63\tabularnewline
+4,5 & 0.5 & 0.03\tabularnewline
+4,7 & 4.5 & 0.3\tabularnewline
+4,8 & 8 & 0.53\tabularnewline
+4,9 & 12.5 & 0.83\tabularnewline
+5,7 & 2 & 0.13\tabularnewline
+5,8 & 4.5 & 0.3\tabularnewline
+5,9 & 8 & 0.53\tabularnewline
+7,8 & 0.5 & 0.03\tabularnewline
+7,9 & 2 & 0.13\tabularnewline
+8,9 & 0.5 & 0.03\tabularnewline
+\bottomrule
+\end{longtable}
+
+Calculando \(E[s^2]\) = 6.967 = \(S^2\)
+
+\textbf{n = 3:}
+
+\begin{longtable}[]{@{}cll@{}}
+\caption{Variãncia amostral para n = 3}\tabularnewline
+\toprule
+Amostra & s² & s²P(ys)\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+Amostra & s² & s²P(ys)\tabularnewline
+\midrule
+\endhead
+2,4,5 & 2.33 & 0.12\tabularnewline
+2,4,7 & 6.33 & 0.32\tabularnewline
+2,4,8 & 9.33 & 0.47\tabularnewline
+2,4,9 & 13 & 0.65\tabularnewline
+2,5,7 & 6.33 & 0.32\tabularnewline
+2,5,8 & 9 & 0.45\tabularnewline
+2,5,9 & 12.33 & 0.62\tabularnewline
+2,7,8 & 10.33 & 0.52\tabularnewline
+2,7,9 & 13 & 0.65\tabularnewline
+2,8,9 & 14.33 & 0.72\tabularnewline
+4,5,7 & 2.33 & 0.12\tabularnewline
+4,5,8 & 4.33 & 0.22\tabularnewline
+4,5,9 & 7 & 0.35\tabularnewline
+4,7,8 & 4.33 & 0.22\tabularnewline
+4,7,9 & 6.33 & 0.32\tabularnewline
+4,8,9 & 7 & 0.35\tabularnewline
+5,7,8 & 2.33 & 0.12\tabularnewline
+5,7,9 & 4 & 0.2\tabularnewline
+5,8,9 & 4.33 & 0.22\tabularnewline
+7,8,9 & 1 & 0.05\tabularnewline
+\bottomrule
+\end{longtable}
+
+Calculando \(E[s^2]\) = 6.967 = \(S^2\)
+
+\textbf{n = 4:}
+
+\begin{longtable}[]{@{}cll@{}}
+\caption{Variãncia amostral para n = 4}\tabularnewline
+\toprule
+Amostra & s² & s²P(ys)\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+Amostra & s² & s²P(ys)\tabularnewline
+\midrule
+\endhead
+2,4,5,7 & 4.33 & 0.29\tabularnewline
+2,4,5,8 & 6.25 & 0.42\tabularnewline
+2,4,5,9 & 8.67 & 0.58\tabularnewline
+2,4,7,8 & 7.58 & 0.51\tabularnewline
+2,4,7,9 & 9.67 & 0.64\tabularnewline
+2,4,8,9 & 10.92 & 0.73\tabularnewline
+2,5,7,8 & 7 & 0.47\tabularnewline
+2,5,7,9 & 8.92 & 0.59\tabularnewline
+2,5,8,9 & 10 & 0.67\tabularnewline
+2,7,8,9 & 9.67 & 0.64\tabularnewline
+4,5,7,8 & 3.33 & 0.22\tabularnewline
+4,5,7,9 & 4.92 & 0.33\tabularnewline
+4,5,8,9 & 5.67 & 0.38\tabularnewline
+4,7,8,9 & 4.67 & 0.31\tabularnewline
+5,7,8,9 & 2.92 & 0.19\tabularnewline
+\bottomrule
+\end{longtable}
+
+Calculando \(E[s^2]\) = 6.967 = \(S^2\)
+
+\section{Trabalho 4}\label{trabalho-4}
+
+\subsection{Intervalo de Confiança(IC)}\label{intervalo-de-confiancaic}
+
+O cálculo do IC é feito atravéz da fórmula
+
+\[
+IC = \overline{Y}\pm Z_{1-\frac{\alpha}{2}}\sqrt{\dfrac{N-n}{N}}\dfrac{S}{\sqrt{n}}
+\]
+
+\subsection{Exercício 4}\label{exercicio-4}
+
+Usando os resultados do Exercício 1, construir o intervalo de confiança
+considerando n = 2, n = 3 e n = 4 e \(\alpha\) - 0.2 e verificar quantas
+das médias amostrais se encontram dentro do IC.
+
+\subsubsection{Resolução}\label{resolucao-3}
+
+\textbf{n = 2}
+
+\[
+IC = 5.83\pm 2.33\sqrt{\dfrac{6-2}{6}}\dfrac{2.63}{\sqrt{2}}=5.83\pm 3.55 \rightarrow IC = (2.28;9.38)
+\]
+
+Com basae nos resultados da Tabela 2 é possível verificar que todas as
+médias amostrais estão dentro do IC.
+
+\textbf{n = 3}
+
+\[
+IC = 5.83\pm 2.33\sqrt{\dfrac{6-3}{6}}\dfrac{2.63}{\sqrt{3}}=5.83\pm 2.51 \rightarrow IC = (3.32;8.38)
+\]
+
+Com basae nos resultados da Tabela 3 é possível verificar que todas as
+médias amostrais estão dentro do IC.
+
+\textbf{n = 4}
+
+\[
+IC = 5.83\pm 2.33\sqrt{\dfrac{6-4}{6}}\dfrac{2.63}{\sqrt{4}}=5.83\pm 1.78 \rightarrow IC = (4.05;7.61)
+\]
+
+Com basae nos resultados da Tabela 4 é possível verificar que todas as
+médias amostrais estão dentro do IC.
+
+\section{Trabalho 5}\label{trabalho-5}
+
+\subsection{Teorema 4}\label{teorema-4}
+
+Para calcular o tamanho amostral de uma pesquisa é necessário usar uma
+amostra piloto, com as informações desta amostra é possível calcular:
+
+\[
+n=\dfrac{n_0}{1+\frac{n_0}{N}} \rightarrow n_0=\bigg(\dfrac{Z_{1-\frac{\alpha}{2}}s_p}{r\overline{y}_p}\bigg)^2
+\]
+
+\emph{OBS:} \(s_p\) e \(\overline{y}_p\) são o desvio padrão e média da
+amostra piloto
+
+\subsection{Exercício}\label{exercicio}
+
+Com base nos dados referentes a QI entregues em sala (Anexo 1),
+verificar se o tamanho da amostra piloto na folha está adequado e
+recalcular os parâmetros com o novo tamanho de amostra. Considerar r =
+0.03
+
+\subsubsection{Resolução}\label{resolucao-4}
+
+\paragraph{Amostra Piloto}\label{amostra-piloto}
+
+As 10 observações aleatórias para a amostra piloto foram colhidas usando
+o número primo 11 e somando mais 11 para selecionar o pŕoximo, sempre
+nas linhas da esquerda para a direita, gerando:
+
+\begin{longtable}[]{@{}lll@{}}
+\caption{Amostra Piloto}\tabularnewline
+\toprule
+Linha & Coluna & QI\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+Linha & Coluna & QI\tabularnewline
+\midrule
+\endhead
+1 & 11 & 96\tabularnewline
+2 & 2 & 100\tabularnewline
+2 & 13 & 89\tabularnewline
+3 & 4 & 90\tabularnewline
+3 & 15 & 95\tabularnewline
+4 & 6 & 94\tabularnewline
+4 & 17 & 87\tabularnewline
+5 & 8 & 104\tabularnewline
+5 & 19 & 85\tabularnewline
+6 & 10 & 84\tabularnewline
+\bottomrule
+\end{longtable}
+
+A amostra piloto tem como média amostral \(\overline{y}_p\) = 92.4 e
+desvio padrão \(s_p\) = 6.55.
+
+\[
+n_0=\bigg(\dfrac{1.96*6.95}{0.03*92.4}\bigg)^2\cong 24
+\]
+
+\[
+n = \dfrac{24}{1+\frac{24}{1000}}\cong 23
+\]
+
+Portanto, com base na amostra piloto, o tamanho da amostra deve ser 23.
+
+\paragraph{Recalcular Parâmetros}\label{recalcular-parametros}
+
+\begin{longtable}[]{@{}lll@{}}
+\caption{Dados sorteados após cálculo do n}\tabularnewline
+\toprule
+Linha & Coluna & QI\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+Linha & Coluna & QI\tabularnewline
+\midrule
+\endhead
+1 & 11 & 96\tabularnewline
+2 & 2 & 100\tabularnewline
+2 & 13 & 89\tabularnewline
+3 & 4 & 90\tabularnewline
+3 & 15 & 95\tabularnewline
+4 & 6 & 94\tabularnewline
+4 & 17 & 87\tabularnewline
+5 & 8 & 104\tabularnewline
+5 & 19 & 85\tabularnewline
+6 & 10 & 84\tabularnewline
+9 & 10 & 89\tabularnewline
+9 & 13 & 89\tabularnewline
+12 & 13 & 77\tabularnewline
+12 & 15 & 97\tabularnewline
+15 & 15 & 91\tabularnewline
+29 & 1 & 99\tabularnewline
+38 & 13 & 87\tabularnewline
+28 & 15 & 83\tabularnewline
+14 & 20 & 100\tabularnewline
+42 & 15 & 80\tabularnewline
+47 & 12 & 90\tabularnewline
+16 & 9 & 88\tabularnewline
+34 & 15 & 88\tabularnewline
+\bottomrule
+\end{longtable}
+
+Ao reaclcular, a média amostral \(\overline{y}_p\) = 90.52 e desvio
+padrão \(s_p\) = 6.76.
+
+\section{Trabalho 6}\label{trabalho-6}
+
+\subsection{Exercício 6}\label{exercicio-6}
+
+Considere que uma petição está sendo lançada para um determinado pedido
+de uma certa causa. Na petição, ao todo, existem 676 páginas onde cada
+uma delas tem um determinado número de assinaturas. Foi selecionada uma
+amostra de 50 páginas registrando-se o número de assinaturas em cada uma
+delas. Com base nesta amostra estime o número total de assinaturas e
+determine o intervalo com 80\% de confiança.
+
+Na tabela abaixo são apresentados os resultados obtidos na amostra
+
+\begin{longtable}[]{@{}cc@{}}
+\caption{Dados do Exercício 6}\tabularnewline
+\toprule
+Nr de Assinaturas & Frequência\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+Nr de Assinaturas & Frequência\tabularnewline
+\midrule
+\endhead
+42 & 23\tabularnewline
+41 & 4\tabularnewline
+36 & 1\tabularnewline
+32 & 1\tabularnewline
+29 & 1\tabularnewline
+27 & 2\tabularnewline
+23 & 1\tabularnewline
+19 & 1\tabularnewline
+16 & 2\tabularnewline
+15 & 2\tabularnewline
+14 & 1\tabularnewline
+11 & 1\tabularnewline
+10 & 1\tabularnewline
+9 & 1\tabularnewline
+7 & 1\tabularnewline
+6 & 3\tabularnewline
+5 & 2\tabularnewline
+4 & 1\tabularnewline
+3 & 1\tabularnewline
+\bottomrule
+\end{longtable}
+
+Com média \(\overline{y}\) = 29.64 e desvio padrão \(s\) = 14.98
+
+\subsubsection{Resolução}\label{resolucao-5}
+
+\[
+IC = 29.64\pm 2.28\sqrt{\dfrac{676-50}{676}}\dfrac{14.98}{\sqrt{50}}=29.64\pm 2.61 \rightarrow IC = (27.03;32.25) \cong (27;32)
+\]
+
+Portanto, com uma confiançã de 80\% o intervalo (27;32) contém a
+verdadeira média de assinaturas por página da petição.
+
+Logo, estima-se que o intervalo (18252;21632) contenha a quantidade
+total de ssinaturas da petição.
+
+\section{Trabalho 7}\label{trabalho-7}
+
+\subsection{Teorema 5}\label{teorema-5}
+
+O cálculo do IC para proporção de população finita é dado por:
+
+\[
+IC=\hat{p}\pm Z_{1-\frac{\alpha}{2}}\sqrt{\dfrac{N-n}{N}}\sqrt{\dfrac{pq}{n-1}}+\dfrac{1}{2n}
+\]
+
+\subsection{Exercício 7}\label{exercicio-7}
+
+Em uma amostragem aleatória simples de tamanho n =100selecionada de uma
+populaçãode tamanho N = 500, há 37 unidades na classe C. Ache os limites
+do intervalo com 95\% de confiança para proporção e para o número total
+de unidades da classe C.
+
+\subsubsection{Resolução}\label{resolucao-6}
+
+\[
+\hat{p}=\dfrac{37}{100}=0.37 \;\;e\;\;  q=1-0.37=0.63\\IC=0.37\pm1.96\sqrt{\dfrac{500-100}{500}}\sqrt{\dfrac{0.37*0.63}{100-1}}+\dfrac{1}{2*100}=0.37\pm0.09
+\]
+
+Logo, o IC para a proporção mostra que com 95\% de confiança o intervalo
+(0.28;0.46) contenha a verdadeira proporção e o intervalo (28;46)
+contenha o número total real de unidades na classe C.
+
+\section{Trabalho 8}\label{trabalho-8}
+
+\subsection{Teorema 6}\label{teorema-6}
+
+Para calcular a estimação de uma razão, usam-se as seguintes fórmulas:
+
+\[
+\hat{R}=\dfrac{\sum_{i=1}^nx_i}{\sum_{i=1}^ny_i}\\\;
+\hat{V}[\hat{R}]=\dfrac{(N-n)}{N}\dfrac{1}{n\overline{x}^2}\bigg[\dfrac{\sum_{i=1}^ny_i^2-2\hat{R}\sum_{i=1}^ny_ix_i+\hat{R}^2\sum_{i=1}^nx_i^2}{n-1}\bigg]\\
+\widehat{EP}[\hat{R}]=\sqrt{\hat{V}[\hat{R}]}\\
+IC= \hat{R}\pm t_{1-\frac{\alpha}{2}}\widehat{EP}[\hat{R}]
+\]
+
+\subsection{Exercício 8}\label{exercicio-8}
+
+Considere que uma particular região tem 1350 fazendas produtoras de
+trigo. Destas fazendas deseja-se conhecer o percentual da área da
+fazenda com o plantio desta cultura. Para tanto, efetuou-se um
+levantamento por amostragem aleatória simples de 20 destas fazendas,
+registrando em cada uma delas a área total da fazenda e a área plantada
+com trigo.
+
+\begin{longtable}[]{@{}ccc@{}}
+\caption{Dados das fazendas}\tabularnewline
+\toprule
+Fazenda & Área Total(xi) & Área Plantada(yi)\tabularnewline
+\midrule
+\endfirsthead
+\toprule
+Fazenda & Área Total(xi) & Área Plantada(yi)\tabularnewline
+\midrule
+\endhead
+1 & 24 & 12.5\tabularnewline
+2 & 19 & 7.9\tabularnewline
+3 & 27 & 11.1\tabularnewline
+4 & 26 & 10.9\tabularnewline
+5 & 27 & 11.2\tabularnewline
+6 & 17 & 7.0\tabularnewline
+7 & 15 & 7.9\tabularnewline
+8 & 7 & 3.3\tabularnewline
+9 & 13 & 4.1\tabularnewline
+10 & 22 & 8.1\tabularnewline
+11 & 8 & 3.3\tabularnewline
+12 & 12 & 5.8\tabularnewline
+13 & 13 & 4.4\tabularnewline
+14 & 11 & 3.7\tabularnewline
+15 & 5 & 2.1\tabularnewline
+16 & 5 & 1.7\tabularnewline
+17 & 27 & 12.3\tabularnewline
+18 & 23 & 3.5\tabularnewline
+19 & 31 & 12.3\tabularnewline
+20 & 12 & 4.4\tabularnewline
+\bottomrule
+\end{longtable}
+
+\subsubsection{Resolução}\label{resolucao-7}
+
+\[
+\hat{R}=\dfrac{137.5}{344}=0.40
+\] Portanto, estima-se que 40\% da área total das fazendas são plantadas
+com trigo.
+
+\[
+\hat{V}[\hat{R}]=\dfrac{(1350-20)}{1350}\dfrac{1}{2017.2^2}\bigg[\dfrac{\sum_{i=1}^ny_i^2-2*0.4\sum_{i=1}^ny_ix_i+0.4^2\sum_{i=1}^nx_i^2}{20-1}\bigg]=0.73\\
+\widehat{EP}[\hat{R}]=\sqrt{0.73}=0.85
+\]
+
+O erro padrão da estimativa foi de 85\%.
+
+\[
+IC= 0.4\pm (-2.09)0.85=4\pm (-1.78)
+\]
+
+Logo, com 95\% de confiança o intervalo (38.22\%;41.78\%) contenha o
+verdadeiro valor da razão da área plantada com trigo.
+
+
+\end{document}

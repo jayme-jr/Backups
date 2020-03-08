@@ -1,0 +1,648 @@
+---
+title: "Trabalho de Biometria"
+author: 
+- Jayme Gomes dos Santos Junior
+- Luciana Helena Kowalski
+date: "`r format(Sys.Date(), '%d/%m/%Y')`"
+output:
+  pdf_document:
+    fig_caption: yes
+    highlight: kate
+    number_sections: yes
+    toc: yes
+subtitle: Relatório da Análise de Dose Resposta Para Base Binária e Contínua 
+header-includes: \usepackage[brazil]{babel}
+                 \usepackage{amsmath}
+                 \usepackage{float}
+                 \usepackage{bm}
+                 \usepackage{graphicx} 
+                 \usepackage{amsmath} 
+                 \floatplacement{figure}{H}
+---
+
+```{r setup, include=FALSE}
+library(tufte)
+# invalidate cache when the tufte version changes
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tufte'), fig.pos= "h")
+options(knitr.kable.NA = '')
+```
+
+```{r echo=FALSE, results ='hide', warning = FALSE, message = FALSE}
+library(tidyverse)
+library(drc)
+library(utils)
+library(kableExtra)
+library(combinat)
+library(tinytex)
+library(MASS)
+library(gridExtra)
+### Capa, caso necessário(tirar o sumário `toc: yes`), título e autores do yaml
+# \begin{center}
+# \textbf{UNIVERSIDADE FEDERAL DO PARANÁ}
+# 
+# \textbf{CURSO DE ESTATÍSTICA}
+# 
+# \vspace{2.2cm}
+# 
+# Jayme Gomes dos Santos Junior
+# 
+# Luciana Helena Kowalski
+# 
+# \vspace{4cm}
+# 
+# \textbf{RELATÓRIO DAS ANÁLISES DE DOSE-RESPOSTA DE BASE DE DADOS BINÁRIA E CONTÍNUA}
+# 
+# \vspace{8.5cm}
+# 
+# \textbf{CURITIBA}
+# 
+# 2019
+# \end{center}
+
+# Exemplo de tabelas KablExtra
+# x1 <- c("y1", "y2", "y3", "y4", "y5", "y6")
+# y1 <- c(2, 4, 5, 7, 8, 9)
+# df1 <- data.frame(x = x1, y = y1)
+# t1_1 <- knitr::kable(df1, align = 'clc',
+#              caption = "População de Tamanho N = 6",
+#              col.names = c("População", "Valores"))
+# 
+# ma2 <- sum(yspys2)
+# t1_2 <- knitr::kable(df2, align = 'clc',
+#              caption = "Amostras Possíveis com n = 2")
+
+########## Análise binária ############
+bin <- read.csv2("base_binaria.csv", header = TRUE, sep = ";", dec = ",")
+
+### O ajuste de diferentes modelos e resultados que permitam comparar seus ajustes----------
+bin$prop <- (bin$resposta+0.5)/(bin$n+1) ### Proporção de respostas.
+### As constantes são adicionadas apenas para evitar proporções iguais a
+### zero ou iguais a um, para que seja possível calcular os logitos (isso
+### só é necessário na produção dos gráficos).
+
+bin$logito <- log((bin$prop)/(1-bin$prop))
+### Cálculo dos logitos.
+
+bin$logDose <- log(bin$dose + 0.5)
+### Como alternativa às doses na escala original, vamos considerar também
+### as log-doses.
+
+########################################################################
+### Análise exploratória.
+### Nenhuma das relações se mostraram lineares.
+T_1_exp <- kableExtra::kable(round(bin, digits = 3), align = 'cccccc', booktabs = TRUE,
+             caption = "Base Binária") %>% 
+kableExtra::kable_styling(latex_options = c("striped", "hold_position"))
+
+########################################################################
+### Ajuste dos modelos
+
+### Vamos ajustar oito modelos resultantes das combinações de: quatro distribuições
+### para a resistência (logística, normal, Gumbel e Cauchy), e as concentrações
+### na escala original e logaritmica.
+
+## Escala original
+mod_logis_orig <- glm(prop ~ dose, family = binomial(link = 'logit'),
+                      weights = n, data = bin)
+
+mod_norm_orig <- glm(prop ~ dose, family = binomial(link = 'probit'),
+                     weights = n, data = bin)
+
+mod_gumb_orig <- glm(prop ~ dose, family = binomial(link = 'cloglog'),
+                     weights = n, data = bin)
+
+mod_cauc_orig <- glm(prop ~ dose, family = binomial(link = 'cauchit'),
+                     weights = n, data = bin)
+
+## Escala logarítmica
+mod_logis_log <- glm(prop ~ logDose, family = binomial(link = 'logit'),
+                     weights = n, data = bin)
+
+mod_norm_log <- glm(prop ~ logDose, family = binomial(link = 'probit'),
+                    weights = n, data = bin)
+
+mod_gumb_log <- glm(prop ~ logDose, family = binomial(link = 'cloglog'),
+                    weights = n, data = bin)
+
+mod_cauc_log <- glm(prop ~ logDose, family = binomial(link = 'cauchit'),
+                    weights = n, data = bin)
+
+
+### Vamos comparar os ajustes usando o critério de informação de Akaike (AIC)
+AIC_bin <- data.frame(AIC(mod_logis_orig, mod_norm_orig, mod_gumb_orig, mod_cauc_orig,
+    mod_logis_log, mod_norm_log, mod_gumb_log, mod_cauc_log)) %>% 
+  mutate(Modelo = c("Logístico(dose)", "Normal(dose)", "Gumbel(dose)", "Cauchy(dose)",
+                        "Logístico(log-dose)", "Normal(log-dose)", "Gumbel(log-dose)",
+                        "Cauchy(log-dose)")) %>% 
+  arrange(AIC) %>% 
+  dplyr::select(Modelo, AIC)
+
+
+T_2_M <- kableExtra::kable(AIC_bin, align = 'cc', booktabs = TRUE,
+             caption = "Modelos Candidatos") %>% 
+kableExtra::kable_styling(latex_options = c("striped", "hold_position"))
+### Aqui o m odelo Cauchit(mod_cauc_log) com a dose na escala logarítmica produziu o melhor
+### ajuste (menor AIC).
+
+# ms <- summary(mod_cauc_log)
+# ms <- data.frame(ms$coefficients) %>%
+#   mutate(Parameters = c("(Intercept)", "logDose"),
+#          Estimate = round(Estimate, digits = 3),
+#          `Std. Error` = round(Std..Error, digits = 3),
+#          `z value` = round(z.value, digits = 3),
+#          `Pr(>|z|)` = paste0(round(Pr...z.., digits = 10), " ***")) %>%
+#   dplyr::select(Parameters, Estimate, `Std. Error`, `z value`, `Pr(>|z|)`)
+# 
+# T_3_summary <- kableExtra::kable(ms, align = 'lcccc', booktabs = TRUE,
+#              caption = "Modeo Cauchy com log-dose") %>%
+# kableExtra::kable_styling(latex_options = c("striped", "hold_position"))
+
+### Resultados que permitam as curvas de dose-resposta nos diferentes grupos.---------------
+graf_bin <- ggplot(bin, aes(x = logDose, y = prop, weight = n)) + geom_point(size = 4) +
+  geom_smooth(method = "glm",  se = F, aes(colour="Logito"),
+              method.args = list(family = binomial(link = 'logit'))) +
+  geom_smooth(method = "glm",  se = F, aes(colour="Probito"),
+              method.args = list(family = binomial(link = 'probit'))) +
+  geom_smooth(method = "glm",  se = F, aes(colour="Cloglog"),
+              method.args = list(family = binomial(link = 'cloglog'))) +
+  geom_smooth(method = "glm",  se = F, aes(colour="Cauchy"),
+              method.args = list(family = binomial(link = 'cauchit'))) +
+  scale_colour_manual(name="Modelo", values=c("blue", "red", "green", "black"))
+# 
+# 
+#plot(mod_cauc_log)
+# ### A curva preta representa o ajuste do modelo com função cauchit, que
+# ### produziu menor valor de AIC.
+# 
+# ### As equações dos modelos ajustados e a interpretação dos parâmetros------
+# 
+# #????????????????????????????????
+# 
+### Um quadro resumo com as estimativas dos parâmetros, erros padrões e ICs (95%)------
+
+coe_b <- mod_cauc_log$coefficients
+tbl_bin <- data.frame(confint(mod_cauc_log)) %>%
+  mutate(LI = round(X2.5.., digits = 3),
+         LS = round(X97.5.., digits = 3),
+         Estimativas = round(coe_b, digits = 3),
+         `Erro Padrão` = round(mod_cauc_log$coefficients, digits = 3),
+         `Parâmetros` = c("Intercept", "logDose")) %>%
+  dplyr::select(`Parâmetros`, LI, Estimativas, LS, `Erro Padrão`)
+
+T_3_summary <- kableExtra::kable(tbl_bin, align = 'lcccc', booktabs = TRUE,
+             caption = "Modeo Cauchy com log-dose") %>%
+kableExtra::kable_styling(latex_options = c("striped", "hold_position"))
+
+# View(tbl_bin)
+# 
+### A análise dos resíduos e o teste da falta de ajuste----------
+
+aj_bin <- as.character(round(pchisq(76.312, 8, lower.tail = F), digits = 15))
+mod_null <- glm(prop ~ 1, family = binomial(link = 'cauchit'),
+                    weights = n, data = bin)
+
+pchisq(deviance(mod_cauc_log), df = mod_cauc_log$df.residual, lower.tail = FALSE)
+
+# par(mfrow = c(1,2))
+# plot(residuals(mod_cauc_log, type = 'pearson') ~ fitted(mod_cauc_log), cex = 1.2, pch = 20,
+#      xlab = 'Valores ajustados', ylab = 'Resíduos')
+# qqnorm(residuals(mod_cauc_log, type = 'pearson'), pch = 20, cex = 1.2)
+# qqline(residuals(mod_cauc_log, type = 'pearson'))
+### O ajuste ficou satisfatório dados o gráfico de resíduos vs valores
+### ajustados que não mostrou padrões e o qqplot evidenciou normalidade.
+### dos resíduos.
+# 
+### Predições para a resposta para ao menos três doses não consideradas no experimento--------
+
+
+data_predic <- data.frame(logDose = log(c(0.5, 0.05, 0.005)))
+data_predic
+### Doses para as quais vamos estimar a probabilidade de resposta.
+
+p <- predict(mod_cauc_log, newdata = data_predic, type = 'response', se.fit = FALSE)
+predicao <- tibble(data_predic$logDose, `Resp. Predita` = p) %>% 
+  mutate(logDose = round(`data_predic$logDose`, digits = 3),
+         `Resp. Predita` = round(`Resp. Predita`, digits = 3)) %>% 
+  dplyr::select(logDose, `Resp. Predita`)
+
+T_4_pred <- kableExtra::kable(predicao, align = 'cc', booktabs = TRUE,
+             caption = "Predição") %>%
+kableExtra::kable_styling(latex_options = c("striped", "hold_position"))
+
+### O argumento type = "response" vai garantir que as predições sejam
+### as probabilidades de resposta (e não os logitos). O argumento se.fit = TRUE
+### garante que, além das probabilidades estimadas, a função retorne os
+### respectivos erros padrões.
+
+### Estimativas de doses efetivas-----------
+
+### Agora, vamos estimar algumas doses efetivas usando a função dose.p, do
+### pacote MASS.
+dose_efec <- dose.p(mod_cauc_log, cf = c(1,2), p = c(0.25,0.5,0.75))
+
+Estimate <- c(exp(dose_efec))
+EP <- attr(dose_efec, "SE")
+
+ICs <- data.frame(LI = round(Estimate -1.96 * EP, digits = 3), 
+                  Estimativa = round(Estimate, digits = 3), 
+                  LS = round(Estimate +1.96 * EP, digits = 3))
+
+T_5_de <- kableExtra::kable(ICs, align = 'lccc', booktabs = TRUE,
+             caption = "Estimativas de Doses Efetivas") %>%
+kableExtra::kable_styling(latex_options = c("striped", "hold_position"))
+
+### O argumento cf indica, no vetor de estimativas, as posições das estimativas
+### de beta0 e beta1 que serão consideradas. Veja abaixo:
+
+### No caso, as estimativas estão nas posições 1 e 2 (só há dois parâmetros
+### estimados, no ajuste de uma única curva).
+
+### Voltando, o argumento p indica as doses efetivas que estamos interessados em estimar.
+
+### Estimativas de potências relativas-------------------------
+
+### Só é usado para comparação entre grupos(tratamentos) e a base binária não tem
+
+########### Análise contínua ############
+cont <- read.csv2("base_continua.csv", header = TRUE, sep = ";", dec = ",")
+
+## Análise exploratória
+# Tabela
+T_1_exp_cont <- kableExtra::kable(head(cont), align = 'ccc', booktabs = TRUE,
+             caption = "Primeiras linhas da Base Contínua") %>% 
+kableExtra::kable_styling(latex_options = c("striped", "hold_position"))
+
+# dose na escala normal
+graf_cont_nor <- ggplot(cont, aes(x = I(Dose), y = Resposta)) + geom_point(aes(colour = Grupo)) + facet_grid(~Grupo)
+
+# dose na escala logaritmica
+graf_cont_log <- ggplot(cont, aes(x = I(log(Dose)), y = Resposta)) + geom_point(aes(colour = Grupo)) + facet_grid(~Grupo)
+
+## Ajustando Modelos
+
+### Modelo log-logístico de três parâmetros.
+ll_3 <- drm(Resposta ~ Dose, curveid = Grupo, data = cont, fct = LL.3())
+
+### Modelo log-logístico de quatro parâmetros.
+ll_4 <- drm(Resposta ~ Dose, curveid = Grupo, data = cont, fct = LL.4())
+
+### Modelo log-logístico de cinco parâmetros.
+ll_5 <- drm(Resposta ~ Dose, curveid = Grupo, data = cont, fct = LL.5())
+
+### Modelo log-normal de três parâmetros.
+ln_3 <- drm(Resposta ~ Dose, curveid = Grupo, data = cont, fct = LN.3())
+
+### Modelo log-normal de quatro parâmetros.
+ln_4 <- drm(Resposta ~ Dose, curveid = Grupo, data = cont, fct = LN.4())
+
+### Modelo Weibull de três parâmetros.
+wbl_3 <- drm(Resposta ~ Dose, curveid = Grupo, data = cont, fct = W1.3())
+
+### Modelo Weibull de quatro parâmetros.
+wbl_4 <- drm(Resposta ~ Dose, curveid = Grupo, data = cont, fct = W1.4())
+
+### Comparação dos modelos
+AIC_cont <- AIC(ll_3, ll_4, ll_5, ln_3, ln_4, wbl_3, wbl_4) %>% 
+  mutate(Modelo = c("Log-logśtico(3 par.)", "Log-logístico(4 par.)", "Log-logístico(5 par.)",
+                    "Log-normal(3 par.)", "Log-normal(4 par.)", "Weibull(3 par.)",
+                    "Weibull(4 par.)")) %>% 
+  dplyr::select(Modelo, AIC) %>% 
+  arrange(AIC)
+
+T_2_M_cont <- kableExtra::kable(AIC_cont, align = 'cc', booktabs = TRUE,
+             caption = "Modelos Candidatos") %>% 
+kableExtra::kable_styling(latex_options = c("striped", "hold_position"))
+
+## Investigando parâmetros
+wbl_4_b <- drm(Resposta ~ Dose, curveid = Grupo, data = cont, 
+               pmodels = data.frame(b = 1, c = Grupo, d = Grupo, e = Grupo), 
+               fct = W1.4())
+anov_cont <- (anova(wbl_4, wbl_4_b)) %>% 
+  mutate(Modelo = c("Weibull(`b` igual)", "Weibull")) %>% 
+  dplyr::select(Modelo, 1:5)
+
+T_3_anov1 <- kableExtra::kable(anov_cont, align = 'lccccc', booktabs = TRUE,
+             caption = "Comparação dos Modelos") %>% 
+kableExtra::kable_styling(latex_options = c("striped", "hold_position")) 
+
+wbl_4_bd <- drm(Resposta ~ Dose, curveid = Grupo, data = cont, 
+                pmodels = data.frame(b = 1, c = Grupo, d = 1, e = Grupo), 
+                fct = W1.4())
+
+anov_cont2 <- anova(wbl_4_b, wbl_4_bd) %>% 
+  mutate(Modelo = c("Weibull(`d` igual)", "Weibull(`b` igual)")) %>% 
+  dplyr::select(Modelo, 1:5)
+
+T_4_anov2 <- kableExtra::kable(anov_cont2, align = 'lccccc', booktabs = TRUE,
+            caption = "Comparação dos Modelos") %>% 
+kableExtra::kable_styling(latex_options = c("striped", "hold_position"))
+
+## Tabela do modelo ajustado
+wbl_4_bs <- summary(wbl_4_b)
+coe <- wbl_4_b$coefficients
+tbl_cont <- data.frame(confint(wbl_4_b)) %>% 
+  mutate(LI = round(X2.5.., digits = 3),
+         LS = round(X97.5.., digits = 3),
+         Coeficientes = round(coe, digits = 3),
+         `Erro Padrão` = round(wbl_4_bs$coefficients[,2], digits = 3),
+         `Parâmetros` = c("b:(Intercept)", "c:a", "c:b", "d:a", "d:b", "e:a", "e:b")) %>% 
+  dplyr::select(`Parâmetros`, LI, Coeficientes, LS, `Erro Padrão`)
+
+T_5_summary <- kableExtra::kable(tbl_cont, align = 'lcccc', booktabs = TRUE,
+            caption = "Modelo Weibull de Quatro Parâmetros") %>% 
+kableExtra::kable_styling(latex_options = c("striped", "hold_position"))
+
+## teste de falta de ajuste
+
+ajust_cont <- modelFit(wbl_4)
+T_aj_cont <- kableExtra::kable(ajust_cont, align = 'lcccc', booktabs = TRUE,
+            caption = "Teste de Falta de Ajuste") %>% 
+kableExtra::kable_styling(latex_options = c("striped", "hold_position"))
+
+## Predição
+data_predict <- data.frame(Dose = c(5, 12, 18))
+
+pred_cont <- predict(wbl_4_b, newdata = data_predict, type = 'response', se.fit = FALSE)
+
+predicao_cont <- tibble(data_predict$Dose, pred_cont) %>% 
+  mutate(Dose = data_predict$Dose,
+         `Resp. Predita` = round(pred_cont, digits = 3)) %>% 
+  dplyr::select(Dose, `Resp. Predita`)
+
+T_6_pred_cont <- kableExtra::kable(predicao_cont, align = 'cc', booktabs = TRUE,
+             caption = "Predição") %>%
+kableExtra::kable_styling(latex_options = c("striped", "hold_position"))
+
+## estimar dose efetiva
+dose_efec_cont <- ED(wbl_4_b, c(25, 50, 75), interval = "delta")
+
+Estimate_cont <- dose_efec_cont[,1]
+EP_cont <- dose_efec_cont[,2]
+
+ICs_cont <- data.frame(LI = round(Estimate -1.96 * EP_cont, digits = 3), 
+                       Estimativa = round(Estimate_cont, digits = 3),
+                       LS = round(Estimate +1.96 * EP_cont, digits = 3))
+ICs_cont
+
+T_7_de_cont <- kableExtra::kable(ICs_cont, align = 'ccc', booktabs = TRUE,
+             caption = "Estimativas de Doses Efetivas") %>%
+kableExtra::kable_styling(latex_options = c("striped", "hold_position"))
+
+## Potência relativa
+
+pr_25 <- data.frame(EDcomp(wbl_4_b, percVec = c(25,25)))
+pr_50 <- data.frame(EDcomp(wbl_4_b, percVec = c(50,50))) 
+pr_75 <- data.frame(EDcomp(wbl_4_b, percVec = c(75,75)))
+
+PR <- bind_rows(list(round(pr_25, digits = 3), round(pr_50, digits = 3), round(pr_75, digits = 3))) %>% 
+  mutate(`Dose Efetiva` = c("a/b:25/25", "a/b:50/50", "a/b:75/75")) %>% 
+  dplyr::select(`Dose Efetiva`, 1:4)
+
+T_8_PR_cont <- kableExtra::kable(PR, align = 'lcccc', booktabs = TRUE,
+             caption = "Estimativas de Potência Relativa") %>%
+kableExtra::kable_styling(latex_options = c("striped", "hold_position"))
+```
+
+# Análise Binária
+
+## Análise Exploratória dos Dados
+
+Base original mais as proporções da resposta, logito das proporções e o logarítmo das doses (Tabela 1).
+
+```{r echo=FALSE}
+T_1_exp
+```
+
+Gráfico das respostas (Figura 1) e do logito das respostas usando dose e a log-dose.
+
+\begin{figure}
+\centering
+\includegraphics{graf_exp.pdf}
+\caption{Respostas e Logito das Respostas Usando Dose e logDose}
+\end{figure}
+
+## Ajuste dos Modelos
+
+Foram ajustados oito modelos usando quatro distribuições: __Logística__, __Normal__,
+__Gumbel__ e __Cauchy__ para a resposta e as doses nas escalas original e logarítmica.
+
+Posteriormente, a seleção do modelo para proseguir a análise foi feita com base no 
+critério de informação de Akaike (AIC) (Tabela 2).
+
+```{r echo=FALSE}
+T_2_M
+```
+
+Comparativo gráfico dos modelos com log-dose:
+
+```{r echo=FALSE, warning = FALSE, message = FALSE}
+graf_bin
+```
+
+A curva azul que representa o modelo __Cauchy__ se ajusta melhor aos dados.
+
+O modelo __Cauchy__ com a dose na escala logarítmica produziu o melhor ajuste com
+AIC = 117,9507
+
+## Equação do Modelo Ajustado e Interpretação dos Parâmetros
+
+O modelo teórico é dado por:
+
+$$
+\tan \bigg[\pi\bigg(\pi_{i} - \frac{1}{2}\bigg)\bigg] = \beta_{0} + \beta_{1}d_{i}
+$$
+Onde $e^{\beta_{1}}$ corresponde ao acréscimo na chance de resposta para um aumento unitário na dose $d_{i}$ e $\beta_{0}$ seria a resposta no caso da dose zero, mas dose zero não faz parte do escopo do
+modelo, logo $\beta_{0}$ não é interpretável.
+
+A equação do modelo ajustado:
+
+$$
+\tan \bigg[\pi\bigg(\pi_{i} - \frac{1}{2}\bigg)\bigg] = 8,323 + 13,012d_{i}
+$$
+\newpage
+
+## Quadro Resumo do Modelo
+
+```{r echo=FALSE}
+T_3_summary
+```
+
+## Análise dos Resíduos e Teste da Falta de Ajuste
+
+```{r echo=FALSE}
+par(mfrow = c(1,2))
+plot(residuals(mod_cauc_log, type = 'pearson') ~ fitted(mod_cauc_log), cex = 1.2, pch = 20,
+     xlab = 'Valores ajustados', ylab = 'Resíduos')
+qqnorm(residuals(mod_cauc_log, type = 'pearson'), pch = 20, cex = 1.2)
+qqline(residuals(mod_cauc_log, type = 'pearson'))
+```
+
+O ajuste ficou satisfatório. Segundo o gráfico de resíduos _vs_ valores ajustados, que em virtude da 
+base ser binária dá a impressão de não ser bom. O qqplot evidenciou normalidade dos resíduos.
+Dado o pequeno numero de observações não se pode ser muito rigoroso na análise.
+
+## Predições Para a Resposta
+
+Aqui são realizadas predições para 3 doses que não estão na base original(0.5, 0.05 e 0.005)
+utilizando o modelo selecionado anteriormente (Tabela 4). 
+
+```{r echo=FALSE}
+T_4_pred
+```
+
+\newpage
+
+## Estimativas Pada Doses Efetivas
+
+Estimativas para doses 25%, 50% e 75% efetivas com intervalo de confiança(95%) (Tabela 5).
+
+```{r echo=FALSE}
+T_5_de
+```
+
+
+# Análise Contínua
+
+## Análise Exploratória dos Dados
+
+Base contendo dois grupos _(a)_ e _(b)_, as mesmas doses para os dois grupos e as respostas (Tabela 6).
+
+```{r echo=FALSE}
+T_1_exp_cont
+```
+
+O gráfico abaixo apresenta as respostas com a dose e a log-dose para cada grupo.
+
+```{r echo=FALSE, warning = FALSE, message = FALSE}
+grid.arrange(graf_cont_nor, graf_cont_log, ncol = 2, nrow = 1)
+```
+
+## Ajuste dos Modelos
+
+Foram ajustados sete modelos usando a dose na escala original e os separando por grupo:
+__Log-logístico__ de três parâmetros, __Log-logístico__ de quatro parâmetros,
+__Log-logístico__ de cinco parâmetros, __Log-normal__ de três parâmetros,
+__Log-normal__ de quatro parâmetros, __Weibull__ de três parâmetros e
+__Weibull__ de quatro parâmetros.
+
+Novamente, a seleção do modelo para proseguir a análise foi feita com base no 
+critério de informação de Akaike (AIC)(Tabela 7).
+
+```{r echo=FALSE}
+T_2_M_cont
+```
+
+O modelo selecionado para seguir com a análise foi o __Weibull__ de quatro parâmetros 
+com AIC = 221,1363
+
+Abaixo seguem os gráficos para verificação das curvas de dose-resposta.
+
+```{r echo=FALSE, warning = FALSE, message = FALSE}
+# par(mfrow = c(1,2))
+plot(wbl_4) 
+title("Curva Ajustada Sobre as Médias")
+plot(wbl_4, type = 'all')
+title("Curva Ajustada Sobre os Dados Amostrais")
+```
+
+Ao analisar as curvas é visível que existe indício de que pode ser usado o mesmo parâmetro de 
+inclinação relativa ao ponto de inflexão `b`. Vamos investigar essa possibilidade usando a ANOVA para comparar os dois modelos.
+
+\newpage
+
+```{r echo=FALSE}
+T_3_anov1
+```
+
+Como não há diferença significativa no ajuste dos dois modelos  (Tabela 8), a análise será conduzida com 
+o modelo mais simples, em que `b` é o mesmo nas duas curvas. Mas antes de prosseguir, investigaremos 
+se podemos fixar a mesma assíntota superior `d` para as duas curvas.
+
+```{r echo=FALSE}
+T_4_anov2
+```
+
+Agora a diferença dos dois ajustes é significativa (Tabela 9). Logo, não podemos usar o mesmo `d` 
+nas duas curvas de dose-resposta. Portanto seguiremos com o modelo __Weibull__ de quatro
+parâmetros e o mesmo `b` para as curvas de cada grupo.
+ 
+## Equação do Model Ajustado e Interpretação dos Parâmetros
+
+O modelo teórico para dois grupos _(a)_ e _(b)_ com _(a)_=1 e _(b)_=2 e mesmo parâmetro `b` é dado por:
+
+$$
+f(\textbf{x}, \boldsymbol{\theta}) = c_{i} + (d_{i} - c_{i})exp\bigg(- exp(b(log x - log e_{i}))\bigg) ,i=1,2 
+$$
+
+Sendo o parâmetro `b` a inclinação relativa em torno do ponto de inflexão que é o parâmetro `e`, 
+`c` e `d` as assíntotas inferior e superior da curva, respectivamente.
+
+As equações do modelo ajustado:
+
+Para o grupo _(a)_:
+
+$$
+f(\textbf{x}, \boldsymbol{\theta}) = 3,143 + (9,175 - 3,143)exp\bigg(- exp(-1,570(log x - log 2,418))\bigg)  
+$$
+
+Para o grupo _(b)_:
+$$
+f(\textbf{x}, \boldsymbol{\theta}) = 6,018 + (11,597 - 6.018)exp\bigg(- exp(-1,570(log x - log 2,333))\bigg)  
+$$
+
+\newpage
+
+## Quadro Resumo do Modelo
+
+```{r echo=FALSE}
+T_5_summary
+```
+
+## Análise de Resíduos e Teste de Faltade Ajuste
+
+```{r echo=FALSE, warning = FALSE, message = FALSE}
+par(mfrow = c(1,2))
+plot(residuals(wbl_4_b, type = 'standard') ~ fitted(wbl_4_b), cex = 1.2, pch = 20,
+     xlab = 'Valores ajustados', ylab = 'Resíduos')
+qqnorm(residuals(wbl_4_b, type = 'standard'), pch = 20, cex = 1.2)
+qqline(residuals(wbl_4_b, type = 'standard'))
+```
+
+O ajuste ficou satisfatório. Segundo o gráfico de resíduos _vs_ valores ajustados que não 
+mostrou padrões e o qqplot evidenciou normalidade dos resíduos.
+
+```{r echo=FALSE}
+T_aj_cont
+```
+
+Baseado no teste, não há evidência de falta de ajuste do modelo (Tabela 11).
+
+## Predições para a Resposta
+
+Utilizando o modelo para predição de três doses não contidas na base original (5, 12 e 18) (Tabela 12).
+
+```{r echo=FALSE}
+T_6_pred_cont
+```
+
+## Estimativas Para Doses Efetivas
+
+Estimativas para doses 25%, 50% e 75% efetivas com intervalo de confiança(95%) (Tabela 13).
+
+```{r echo=FALSE}
+T_7_de_cont
+```
+
+## Estimativas de Potências Relativas
+
+Agora vamos comparar cada grupo para cada dose efetiva usando a potência relativa (Tabela 14).
+
+```{r echo=FALSE}
+T_8_PR_cont
+```
+
+O fato do parâmetro `b` ser o memso para as duas curvas implicaque a potência relativa é 
+a mesma para qualquer dose efetiva, caracterizando paralelismo (Tabela 15).
+
+
+

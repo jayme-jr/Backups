@@ -1,0 +1,325 @@
+---
+title: "Apresentação SAR"
+author: "Rafael Morciani/GRR:20160217"
+date: '`r Sys.Date() `'
+output:
+  pdf_document: default
+subtitle: Modelo Espacial AutoRegressivo (SAR)
+header-includes: \usepackage[brazil]{babel}
+                 \usepackage{amsmath}
+                 \usepackage{float}
+                 \usepackage{bm}
+csl: ABNT_UFPR_2011.csl
+bibliography: refs.bib
+---
+
+#Resumo
+
+- Modelo autoregressivo espacial.
+- Medir a dependência espacial $\rho$.
+- Políticas públicas.
+- Máxima verossimilhança.
+
+#Introdução
+- Simulação no R.
+- Funções de log e verossimilhança.
+- Não calcularemos a função escore.
+- Função "optim".
+- Se $\rho = 0$, regressão linear.
+
+\pagebreak
+
+#Modelo
+
+Y = $\rho$ $W$ Y + X $\beta$ + $\epsilon$, $\epsilon \sim N(0;\sigma^2I)$
+
+Y: Variável dependente;
+
+$\rho$: Parâmetro espacial responsável por mensurar o grau de dependência espacial;
+
+W: Matriz de vizinhança;
+
+X: Vetor das variáveis independentes;
+
+$\beta$: Vetor dos coeficientes de regressão;
+
+$\epsilon$: Erro aleatório;
+
+$\sigma^2$: Variância do modelo;
+
+I: Matriz identidade.
+
+Suporte da distribuição: Y $\in \mathbb{R}$ 
+
+Espaço paramétrico: $\rho \in [-1;1],\ \sigma^2 \in\mathbb{R_+^*},\ \beta\in\mathbb{R},\ \mu\in\mathbb{R}$
+
+\pagebreak
+
+#Inferência
+
+- Estimadores ($\mu, \rho \ , \sigma^2 \ e \ \beta's$).
+
+- $\hat\rho$ máxima verossimilhança $N_{multivariada}$
+
+- Z $\sim$ $N_m$($\mu;\Sigma$)
+
+- $\mu = \beta_0+\beta_1X$
+
+- $\Sigma$ = $(I-\rho W)^{-1}\sigma^2I(I-{\rho W}')^{-1}$
+
+- $f(y_i;\rho;\mu;\sigma^2) = (2\pi)^{\frac{-p}{2}}\left |\Sigma  \right |^{\frac{-1}{2}}e^{\frac{-1}{2}(y_i - \mu)\Sigma^{-1}{(y_i - \mu)}'}$
+
+- p = Total de observações
+
+- Uma observação (n=1).
+
+\pagebreak
+
+#Inferência
+
+1. **Verossimilhança**
+
+- $L(\rho;\mu;\sigma^2;y_i) = (2\pi)^{\frac{-p}{2}} \left | \Sigma \right |^{\frac{-1}{2}} e^{\frac{-1}{2}(y_i-\mu)\Sigma^{-1}{(y_i-\mu)}'}$
+
+2. **log-verossimilhança**
+
+- $l(\rho;\mu;\sigma^2;y_i) = -\frac{1}{2} \left [ p\log(2\pi) + log(\left | \Sigma \right |) + (Y-\mu)\Sigma^{-1}{(Y-\mu)}' \right ]$
+
+3. **Maximizando a função**
+
+- "optim" ($\hat{\mu},\hat{\rho},\hat{\sigma^2} \ e \ \hat{\beta's}$).
+
+- Consistentes, não viciados e eficientes.
+
+4. **TH e IC**
+
+- Teste Wald: $Z_n=\frac{\hat{\theta}-\theta}{\sqrt{V[\hat{\theta}]}} \sim N(0;1)$.
+
+- $IC_{95\%}$.
+
+\pagebreak
+
+#Implementação Computacional
+```{r, echo=FALSE, include=FALSE}
+# Criando a estrutura espacial
+# Lista de vizinhos
+require(spdep)
+require(mvtnorm)
+
+nb <- cell2nb(nrow = 10, ncol = 10)
+
+# Matriz de vizinhanca
+matriz = cell2nb(nrow=10,ncol=10,type="rook")
+W = nb2mat(matriz)
+
+#Definindo as variaveis
+Sigma <- function(rho, sigma2, W) {
+  I <- diag(rep(1,ncol(W)))
+  B <- rho*W
+  p1 <- solve( (I - B) )
+  p2 <- solve( (I - t(B)) )
+  out <- sigma2*(p1%*%p2)
+  return(out)
+}
+
+Sigma2 <- as.matrix(Sigma(rho = 0.5, sigma2 = 1, W = W))
+x1 <- seq(-1,1, l = 100)
+mu <- 2 + 3*x1
+Y <- as.numeric(rmvnorm(1, mean = mu, sigma = Sigma2))
+
+#Verossimilhanca
+L <- function(Sigma,Y) {
+  p <- length(Y)
+  out <- prod( ((2*pi)^(-p/2)) * (1/determinant(Sigma,logarithm=T)) * 
+                 exp((-1/2)*Y%*%solve(Sigma)%*%t(Y)) )
+  return(out)
+  }
+
+#Log-verossimilhanca
+lv <- function(par, W, Y, x1) {
+  beta0 <- par[1]
+  beta1 <- par[2]
+  rho <- par[3]
+  sigma2 <- par[4]
+  p <- length(Y)
+  Sigma2 <- as.matrix(Sigma(rho = rho, sigma2 = sigma2, W = W))
+  mu <- beta0 + beta1*x1
+  out <- dmvnorm(x = Y, mean = mu, sigma = Sigma2, log = TRUE)
+  return(as.numeric(out))
+}
+
+## Avaliando a log-Verossimilhança em um ponto
+lv(par = c(2, 3, 0.5, 1), W = W, Y = Y, x1 = x1)
+
+#Maximizando a log-verossimilhanca
+est <- optim(par = c(0,0, 0, 1), fn = lv, W = W, Y = Y, x1 = x1, 
+             method = "L-BFGS-B",
+             lower = c(-Inf, -Inf, -0.99, 0.0001), upper = c(Inf, Inf, 0.99, Inf),
+             control = list(fnscale = -1), hessian = T)
+
+#Estimativas obtidas
+Beta0_hat <- est$par[1]
+Beta1_hat <- est$par[2]
+rho_hat <- est$par[3]
+sigma2_hat <- est$par[4]
+
+#Matriz de informação observada
+I_o <- (-est$hessian)
+
+#Variâncias dos estimadores
+V <- sqrt(diag(solve(I_o)))
+
+#Teste de hipotese Wald
+#H0: rho = 0, H1: rho != 0
+rho_0 <- 0
+Zn <- (rho_hat - rho_0)/(V[3])
+
+#Intervalo com 95% de confiança
+inf <- rho_hat - (1.96*V[3])
+sup <- rho_hat + (1.96*V[3])
+IC <- c(inf,sup)
+```
+
+1. **Dados simulados**
+```{r}
+# Criando a estrutura espacial
+# Lista de vizinhos
+nb <- cell2nb(nrow = 10, ncol = 10)
+
+# Matriz de vizinhanca
+matriz = cell2nb(nrow=10,ncol=10,type="rook")
+W = nb2mat(matriz)
+           
+#Demais variaveis
+Sigma <- function(rho, sigma2, W) {
+  I <- diag(rep(1,ncol(W)))
+  B <- rho*W
+  p1 <- solve( (I - B) )
+  p2 <- solve( (I - t(B)) )
+  out <- sigma2*(p1%*%p2)
+  return(out)
+}
+
+Sigma2 <- as.matrix(Sigma(rho = 0.5, sigma2 = 1, W = W))
+
+x1 <- seq(-1,1, l = 100)
+
+mu <- 2 + 3*x1
+
+Y <- as.numeric(rmvnorm(1, mean = mu, sigma = Sigma2))
+```
+\pagebreak
+
+2. **Função de Verossimilhança e Log-Verossimilhança**
+```{r}
+#Verossimilhanca
+L <- function(Sigma,Y) {
+  p <- length(Y)
+  out <- prod( ((2*pi)^(-p/2)) * (1/determinant(Sigma,logarithm=T)) * 
+                 exp((-1/2)*Y%*%solve(Sigma)%*%t(Y)) )
+  return(out)
+  }
+
+#Log-verossimilhanca
+lv <- function(par, W, Y, x1) {
+  beta0 <- par[1]
+  beta1 <- par[2]
+  rho <- par[3]
+  sigma2 <- par[4]
+  p <- length(Y)
+  Sigma2 <- as.matrix(Sigma(rho = rho, sigma2 = sigma2, W = W))
+  mu <- beta0 + beta1*x1
+  out <- dmvnorm(x = Y, mean = mu, sigma = Sigma2, log = TRUE)
+  return(as.numeric(out))
+}
+```
+
+\pagebreak
+
+#Implementação Computacional
+
+3. **Maximizando a LV pela "optim"**
+
+Para utilização desta função, precisou definir o espaço paramétrico de cada estimados, para isso foi utilizado o método "L-BFGS-B".
+```{r}
+est <- optim(par = c(0,0, 0, 1), fn = lv, W = W, Y = Y, x1 = x1, 
+             method = "L-BFGS-B",
+             lower = c(-Inf, -Inf, -0.99, 0.0001), upper = c(Inf, Inf, 0.99, Inf),
+             control = list(fnscale = -1), hessian = T)
+```
+4. **Estimativas obtidas**
+```{r}
+Beta0_hat <- est$par[1]
+Beta1_hat <- est$par[2]
+rho_hat <- est$par[3]
+sigma2_hat <- est$par[4]
+```
+
+\pagebreak
+
+#Implementação Computacional
+
+5. **Matriz Io e variâncias**
+```{r}
+#Matriz de informação observada
+I_o <- (-est$hessian)
+I_o
+V <- sqrt(diag(solve(I_o)))
+V
+```
+\pagebreak
+
+#Implementação Computacional
+
+6. **Teste Wald e IC de 95%**
+
+Teste Wald:
+$H_0: \rho = 0,\ H_1: \rho \neq 0$
+```{R}
+rho_0 <- 0
+Zn <- (rho_hat - rho_0)/(V[3])
+Zn
+```
+Intervalo com 95% de confiança
+```{r}
+inf <- rho_hat - (1.96*V[3])
+sup <- rho_hat + (1.96*V[3])
+IC <- c(inf,sup)
+IC
+```
+
+\pagebreak
+
+#Conclusão
+
+- Valores definidos para os estimadores:
+
+$\rho$ = 0.5
+
+$\sigma^2$ = 1
+
+$\beta_0$ = 2
+
+$\beta_1$ = 3
+
+- Estimativas obtidas:
+
+$\hat{\rho}$ = `r rho_hat `
+
+$\hat{\sigma^2}$ = `r sigma2_hat `
+
+$\hat{\beta_0}$ = `r Beta0_hat `
+
+$\hat{\beta_1}$ = `r Beta1_hat `
+
+- Teste Wald
+
+$H_0: \rho = 0$, $H_1: \rho \neq 0$
+
+$Z_n$ = `r Zn `
+
+Rejeita-se $H_0$
+
+- Intervalo com 95% de confiança para $\hat\rho$
+
+$IC_{95\%}$: [`r IC `]

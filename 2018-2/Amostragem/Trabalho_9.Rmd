@@ -1,0 +1,96 @@
+---
+title: "Trabalho 9"
+author: "Rafael Morciani/GRR:20160217"
+date: "25 de setembro de 2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+options(digits=2)
+Y <- matrix(data = c(1:20,24,19,27,26,27,17,15,7,13,22,8,12,13,11,5,5,27,23,31,12, 12.5,7.9,11.1,10.9,11.2,7,7.9,3.3,4.1,8.1,3.3,5.8,4.4,3.7,2.1,1.7,12.3,3.5,12.3,4.4), ncol = 3, dimnames = list(c(" "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "), c("Fazenda","Área Total (u.a)","Área Plantada com trigo (u.a)")))
+Y
+```
+
+# Trabalho 9
+
+Considere que uma particular região tem 1350 fazendas produtoras de trigo. Destas fazendas deseja-se conhecer o percentual da área da fazenda utilizada com o plantio desta cultura. Para tanto efetuou-se um levantamento por amostragem aleatória simples de 20 destas fazendas, registrando-se em cada uma delas a área total da fazenda e a área plantada com trigo.
+
+Na tabela abaixo são representados os resultados deste levantamento:
+```{r, echo=FALSE}
+Y
+```
+Com base nestas informações, estime o percentual da área total plantada com trigo.
+
+Estime também o erro padrão desta estimativa e o intervalo com 95% de confiança da referida razão.
+
+### Para fins de cálculos
+
+N = 1350 Fazendas
+
+n = 20 Fazendas
+
+R = % da fazenda plantada com trigo
+
+$x_i$ = Área total das fazendas amostradas plantadas com trigo
+
+$y_i$ = Área total das fazendas amostradas
+
+$\bar{x}$ = Média da área total das fazendas amostradas
+
+$\hat{R}$ = $\frac{\sum{x_i}}{\sum{y_i}}$
+
+$\hat{V}[\hat{R}]$ = $(\frac{N-n}{N})\frac{1}{n\bar{x}^2}[\frac{\sum{y_i^2}-2\hat{R}\sum{y_ix_i}+\hat{R}^2\sum{x_i^2}}{n-1}]$ 
+
+$\hat{EP}[\hat{R}]$ = $\sqrt{\hat{V}[\hat{R}]}$
+
+I.C = $\hat{R} \pm t_{1-\frac{\alpha}{2}} \hat{EP}[\hat{R}]$
+
+$\alpha = 0,05$
+
+### Cálculos
+
+```{r}
+R_hat <- sum(Y[,"Área Plantada com trigo (u.a)"])/sum(Y[,"Área Total (u.a)"])
+```
+
+$\sum{x_i}$ = `r sum(Y[,3]) `
+
+$\sum{y_i}$ = `r sum(Y[,2]) `
+
+```{r}
+N <- 1350
+n <- 20
+x_i <- sum(Y[,3])
+y_i <- sum(Y[,2])
+x_bar <- y_i/length(Y[,2]) 
+V_hat <- ((N-n)/N) * (1/(n*(x_bar^2))) * ( ((y_i^2) - (2*R_hat*y_i*x_i) + ((R_hat^2)*(x_i^2)))/(n-1))
+EP_hat <- sqrt(V_hat)
+t_19 = qt(p=(0.025), 19, lower.tail = TRUE)
+```
+$x_i$ = `r x_i `
+
+$y_i$ = `r y_i `
+
+$\bar{x}$ = `r x_bar `
+
+$\hat{V}[\hat{R}]$ = `r V_hat `
+
+$t_{19}$ = `r t_19 `
+
+
+### Conclusão
+
+
+Estima-se que `r R_hat*100 ` % da área total das fazendas é plantada com trigo.
+
+$\hat{R}$ = `r R_hat*100 ` %
+
+
+Estima-se também que o erro padrão da estimativa acima é igual à `r EP_hat` %
+
+$\hat{EP}[\hat{R}]$ = `r EP_hat ` %
+
+
+Intervalo com 95% de confiança de que o verdadeiro valor da razão esteja contido nele:
+
+I.C = [`r ((R_hat*100)+(t_19*EP_hat)) ` % ; `r ((R_hat*100)-(t_19*EP_hat))` %]

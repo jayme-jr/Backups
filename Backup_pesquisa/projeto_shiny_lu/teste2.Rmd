@@ -1,0 +1,145 @@
+---
+title: "Nome do Aplicativo"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: scroll
+    navbar:
+      - { title: "PET", href: "https://pet-estatistica.github.io/site/", icon: fa-github,
+       align: right }
+  runtime: shiny
+---
+
+HOME
+=====================================
+
+Inputs {.sidebar}
+-------------------------------------
+
+```{r}
+        textInput('x', "enter X value here","")
+        
+        textInput('y', "enter Y value here","")
+        
+        actionButton("submit","Submit")
+```
+
+Column 
+--------------------------------------------------------------------
+
+### chart 1
+```{r}
+Data = reactive({
+      if (input$submit > 0) {
+        df <- data.frame(x=input$x,y=input$y)
+        return(list(df=df))
+      }
+    })
+
+output$table <- renderTable({
+      if (is.null(Data())) {return()}
+      print(Data()$df)
+    }, 'include.rownames' = FALSE
+    , 'include.colnames' = TRUE
+    , 'sanitize.text.function' = function(x){x}
+    )
+
+```
+
+module test
+=====================================
+
+Inputs {.sidebar}
+-------------------------------------
+
+```{r}
+
+
+```
+
+Column 
+--------------------------------------------------------------------
+
+### 
+```{r}
+# include the module
+source("module_test.R")
+# call the module UI
+worldPhonesUI("phones")
+# call the module Server
+callModule(worldPhones, "phones")
+
+
+```
+
+module test 2
+=====================================
+
+Column 
+--------------------------------------------------------------------
+
+### chart 1
+```{r}
+source("module_test2.R")
+# call the module UI
+dfUI("tecido")
+# call the module Server
+callModule(df, "tecido")
+
+```
+
+inline test 2
+=====================================
+
+Column 
+--------------------------------------------------------------------
+
+###
+
+```{r}
+shinyApp(
+  ui = pageWithSidebar(
+      headerPanel("textInput Demo")
+      ,
+      sidebarPanel(
+        wellPanel(
+          textInput('x', "enter X value here","")
+          ,
+          textInput('y', "enter Y value here","")
+          ,
+          actionButton("submit","Submit")
+        )
+      )
+      ,
+      mainPanel(uiOutput('table'))
+  ),
+  
+  server = function(input,output,session){
+    
+    Data = reactive({
+      if (input$submit > 0) {
+        if (input$y > 0){
+         df <- data.frame(x = as.numeric(unlist(strsplit(input$x, ',')))
+                         , y = as.numeric(unlist(strsplit(input$y, ','))))
+        return(list(df=df))
+        }
+        else {
+          df <- data.frame(x = as.numeric(unlist(strsplit(input$x, ','))))
+          return(list(df=df))
+        }
+      }
+    })
+    
+    output$table <- renderTable({
+      if (is.null(Data())) {return()}
+      print(Data()$df)
+    }, 'include.rownames' = FALSE
+    , 'include.colnames' = TRUE
+    , 'sanitize.text.function' = function(x){x}
+    )
+    
+  }
+)
+
+```
+
